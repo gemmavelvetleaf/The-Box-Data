@@ -1,2 +1,2 @@
-VERSION=2
-PACK=REMOTE|3|4|packs/remote-test.txt
+VERSION=4
+PACK=REMOTE
