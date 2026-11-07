@@ -1,6 +1,7 @@
-PACK=Remote Test
-REV=1
-COUNT=3
+PACK=Scenes Pack REMOTE
+# BOX-SCENES manufacturers library
+# F/C/W1/W2/W3/W4 = floor/ceiling/walls
+# 54 Scenes
 
 [Palms on Red]
 F=22aca67a-946a-fae7-448c-8da90265b34a|<1,0.97,0>|<0,0,0>|0|<1,1,1>|1|0
@@ -25,3 +26,4 @@ W1=775fe680-58f5-11ad-25d7-243ababc5b95|<1,1,0>|<0,0,0>|0|<1,1,1>|1|1
 W2=775fe680-58f5-11ad-25d7-243ababc5b95|<1,1,0>|<0,0,0>|0|<1,1,1>|1|1
 W3=775fe680-58f5-11ad-25d7-243ababc5b95|<1,1,0>|<0,0,0>|0|<1,1,1>|1|1
 W4=775fe680-58f5-11ad-25d7-243ababc5b95|<1,1,0>|<0,0,0>|0|<1,1,1>|1|1
+
