@@ -1,4 +1,6 @@
 VERSION=3
-REMOTE
-SPLASH
+Pickles
+Splish
+Splash
+
 
