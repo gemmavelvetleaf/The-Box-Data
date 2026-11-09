@@ -6,6 +6,8 @@ on:
     paths:
       - 'packs/*.txt'
       - 'tools/split_box_packs.py'
+      - 'tools/test_split_box_packs.py'
+      - 'pack-order.txt'
       - '.github/workflows/build-box-chunks.yml'
   workflow_dispatch:
 
@@ -21,7 +23,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Build line-aligned chunks
+      - name: Validate generator behavior
+        run: python3 -m unittest discover -s tools -p 'test_split_box_packs.py'
+
+      - name: Validate packs and build line-aligned chunks
         run: python3 tools/split_box_packs.py
 
       - name: Commit generated chunks
