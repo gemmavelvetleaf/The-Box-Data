@@ -1,5 +1,6 @@
-VERSION=1
+VERSION=hc88cb1238fae
 PACK=Scenes Pack 3
+
 # BOX-SCENES manufacturers library
 # F/C/W1/W2/W3/W4 = floor/ceiling/walls
 # 30 Scenes

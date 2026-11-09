@@ -1,5 +1,6 @@
-VERSION=1
+VERSION=h9ffb82b4ac82
 PACK=Default Red Dudes
+
 # BOX-SCENES manufacturers library
 # F/C/W1/W2/W3/W4 = floor/ceiling/walls
 #54 scenes
