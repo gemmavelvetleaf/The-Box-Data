@@ -1,9 +1,5 @@
-VERSION=hc88cb1238fae
+VERSION=hf793f06fc269
 PACK=Scenes Pack 3
-
-# BOX-SCENES manufacturers library
-# F/C/W1/W2/W3/W4 = floor/ceiling/walls
-# 30 Scenes
 
 [Heart shrub]
 F=311d23ba-f0d6-5988-237e-b260029ddaa4|<3,3,0>|<0,0,0>|1.570796|<0.447059,0.537255,0.447059>|1|1
@@ -54,3 +50,4 @@ W3=80d25e71-22be-656c-d957-42d57df45b53|<1,1,0>|<0,0,0>|0|<1,1,1>|1|1
 W4=80d25e71-22be-656c-d957-42d57df45b53|<1,1,0>|<0,0,0>|0|<1,1,1>|1|1
 
 [Leaves on Pink]
+F=c621078a-928f-e071-5ba5-852e5dba4406|<1,1,0>|<0,0,0>|3.141593|<1,1,1>|1|1
