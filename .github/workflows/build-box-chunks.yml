@@ -1,4 +1,4 @@
-name: Build The Box remote chunks
+name: Build The Box scene data
 
 on:
   push:
@@ -26,7 +26,7 @@ jobs:
       - name: Validate generator behavior
         run: python3 -m unittest discover -s tools -p 'test_split_box_packs.py'
 
-      - name: Validate packs and build line-aligned chunks
+      - name: Validate scene packs and build data
         run: python3 tools/split_box_packs.py
 
       - name: Commit generated chunks
@@ -40,3 +40,10 @@ jobs:
           fi
           git commit -m "Update generated Box remote chunks"
           git push
+
+      - name: Explain a failed scene data update
+        if: failure()
+        run: |
+          echo "## ❌ The Box scene data update did not complete" >> "$GITHUB_STEP_SUMMARY"
+          echo "Open the failed step above for the file, line, and correction needed." >> "$GITHUB_STEP_SUMMARY"
+          echo "The Box may continue using the previous saved scenes until this is fixed." >> "$GITHUB_STEP_SUMMARY"
