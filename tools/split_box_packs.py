@@ -17,6 +17,8 @@ from pathlib import Path
 from urllib.parse import quote, urlsplit
 
 MAX_CHUNK_BYTES = 3000
+# Leave room for CHUNK=index/count|sha256\n on each response.
+MAX_PAYLOAD_BYTES = MAX_CHUNK_BYTES - 90
 MAX_SCENES = 54
 MAX_SCENE_LINES = 24  # 6 core + 6 outside/mirror + 6 inside G + 6 outside G
 MAX_PACKS = 24
@@ -236,9 +238,9 @@ def split_line_aligned(text: str, path: Path) -> list[str]:
     size = 0
     for line in text.splitlines(keepends=True):
         n = len(line.encode("utf-8"))
-        if n > MAX_CHUNK_BYTES:
-            error(f"{path}: one generated line exceeds {MAX_CHUNK_BYTES} bytes")
-        if current and size + n > MAX_CHUNK_BYTES:
+        if n > MAX_PAYLOAD_BYTES:
+            error(f"{path}: one generated line exceeds {MAX_PAYLOAD_BYTES} bytes")
+        if current and size + n > MAX_PAYLOAD_BYTES:
             chunks.append("".join(current))
             current, size = [], 0
         current.append(line)
@@ -298,7 +300,11 @@ def build(root: Path) -> None:
             target = stage / name
             target.mkdir()
             for i, text in enumerate(chunks):
-                (target / f"{i:03d}.txt").write_text(text, encoding="utf-8", newline="")
+                checksum = hashlib.sha256(text.encode("utf-8")).hexdigest()
+                envelope = f"CHUNK={i + 1}/{len(chunks)}|{checksum}\n{text}"
+                if len(envelope.encode("utf-8")) > MAX_CHUNK_BYTES:
+                    error(f"{name}: generated chunk {i} exceeds HTTP capacity")
+                (target / f"{i:03d}.txt").write_text(envelope, encoding="utf-8", newline="")
             index.append(f"{name}|{version}|{len(chunks)}\n")
             print(f"{name}: {scenes} scenes, version {version}, {len(chunks)} chunks")
         (stage / "index.txt").write_text("".join(index), encoding="utf-8", newline="")
