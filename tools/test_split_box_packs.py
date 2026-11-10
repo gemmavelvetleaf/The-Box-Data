@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import hashlib
 import subprocess
 import sys
 import tempfile
@@ -175,6 +176,45 @@ class ChunkGeneratorTests(unittest.TestCase):
         build(self.root)
         self.assertFalse((self.root / "chunks" / "B").exists())
         self.assertEqual(len((self.root / "chunks" / "index.txt").read_text().splitlines()), 2)
+
+    def test_every_generated_chunk_has_a_verifiable_sha256_envelope(self):
+        many = "\n".join(SCENE.replace("[One]", f"[Scene {i:02}]")
+                         for i in range(1, 30))
+        self.put(content=many)
+        build(self.root)
+        index = (self.root / "chunks" / "index.txt").read_text().splitlines()
+        number = int(index[1].split("|")[2])
+        self.assertGreater(number, 1)
+        combined = ""
+        for i in range(number):
+            raw = (self.root / "chunks" / "Pasture" / f"{i:03d}.txt").read_bytes()
+            self.assertLessEqual(len(raw), 3000)
+            header, text = raw.split(b"\n", 1)
+            self.assertEqual(header.decode(),
+                             f"CHUNK={i + 1}/{number}|" + hashlib.sha256(text).hexdigest())
+            combined += text.decode("utf-8")
+        self.assertEqual(combined.count("[Scene"), 29)
+        self.assertTrue(combined.startswith("VERSION="))
+
+    def test_rustic_window_github_gif_is_accepted_by_python(self):
+        raw_gif = ("https://raw.githubusercontent.com/"
+                   "gemmavelvetleaf/The-Box-Data/main/GIF/mind.gif")
+        self.put(content=SCENE + "UW4=" + raw_gif + "\n")
+        build(self.root)
+        chunk = (self.root / "chunks" / "Pasture" / "000.txt").read_text()
+        self.assertIn("UW4=" + raw_gif, chunk)
+
+    def test_invalid_graphics_url_does_not_replace_published_chunks(self):
+        path = self.put(content=SCENE + "UW4=https://example.com/mind.gif\n")
+        build(self.root)
+        old = {p.relative_to(self.root / "chunks"): p.read_bytes()
+               for p in (self.root / "chunks").rglob("*.txt")}
+        path.write_text(SCENE + "UW4=not-a-url\n")
+        with self.assertRaisesRegex(ValueError, "HTTP"):
+            build(self.root)
+        new = {p.relative_to(self.root / "chunks"): p.read_bytes()
+               for p in (self.root / "chunks").rglob("*.txt")}
+        self.assertEqual(old, new)
 
 
 if __name__ == "__main__":
