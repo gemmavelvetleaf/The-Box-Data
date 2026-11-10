@@ -1,6 +1,8 @@
 """Offline regression checks for The Box chunk generator."""
 from __future__ import annotations
 
+import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -15,6 +17,7 @@ PANEL = f"{UUID}|<1,1,0>|<0,0,0>|0|<1,1,1>|1|1"
 SCENE = "[One]\n" + "\n".join(f"{p}={PANEL}" for p in
                                      ("F", "C", "W1", "W2", "W3", "W4")) + "\n"
 GIF = "https://github.com/gemmavelvetleaf/The-Box-Data/blob/main/GIF/People%20Machine.gif"
+STREAM = "http://85.215.155.9:86/hls/stream/?controls=false&muted=false&autoplay=true&playsinline=true"
 
 
 class ChunkGeneratorTests(unittest.TestCase):
@@ -55,6 +58,20 @@ class ChunkGeneratorTests(unittest.TestCase):
             build(self.root)
         self.assertEqual(old, (self.root / "chunks" / "index.txt").read_bytes())
 
+    def test_cli_failure_has_visible_github_annotation_and_summary(self):
+        self.put(content=SCENE + "NOT_A_PANEL=" + PANEL + "\n")
+        summary = self.root / "step-summary.md"
+        env = dict(os.environ, GITHUB_STEP_SUMMARY=str(summary))
+        command = [sys.executable,
+                   str(Path(__file__).with_name("split_box_packs.py")),
+                   "--root", str(self.root)]
+        run = subprocess.run(command, text=True, capture_output=True, env=env,
+                             check=False)
+        self.assertNotEqual(run.returncode, 0)
+        self.assertIn("NO NEW SCENES WERE PUBLISHED", run.stderr)
+        self.assertIn("::error file=packs/Pasture.txt,line=", run.stderr)
+        self.assertIn("The Box scene pack update failed", summary.read_text())
+
     def test_duplicate_name_rejected(self):
         path = self.put(content=SCENE + "\n" + SCENE)
         with self.assertRaisesRegex(ValueError, "duplicate scene name"):
@@ -65,25 +82,30 @@ class ChunkGeneratorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "invalid texture UUID"):
             canonicalize_and_validate(path, path.read_text())
 
-    def test_gif_and_outside_tags_can_share_panel(self):
-        source = SCENE + "OW1=" + PANEL + "\nGW1=" + GIF + "\n"
+    def test_graphics_and_outside_tags_can_share_panel(self):
+        source = SCENE + "O1=" + PANEL + "\nUW1=" + GIF + "\nUO1=" + STREAM + "\n"
         path = self.put(content=source)
         _, generated, count = canonicalize_and_validate(path, path.read_text())
         self.assertEqual(count, 1)
-        self.assertIn("GW1=" + GIF, generated)
+        self.assertIn("UW1=" + GIF, generated)
+        self.assertIn("UO1=" + STREAM, generated)
 
-    def test_bad_gif_url_is_rejected(self):
-        path = self.put(content=SCENE + "GW1=https://example.com/photo.gif\n")
-        with self.assertRaisesRegex(ValueError, "invalid GitHub GIF URL"):
+    def test_non_github_gif_is_accepted(self):
+        path = self.put(content=SCENE + "UW1=https://example.com/photo.gif\n")
+        canonicalize_and_validate(path, path.read_text())
+
+    def test_bad_graphics_scheme_is_rejected(self):
+        path = self.put(content=SCENE + "UW1=javascript:alert(1)\n")
+        with self.assertRaisesRegex(ValueError, r"HTTP\(S\)"):
             canonicalize_and_validate(path, path.read_text())
 
-    def test_duplicate_gif_panel_is_rejected(self):
-        path = self.put(content=SCENE + "GW1=" + GIF + "\nGW1=" + GIF + "\n")
-        with self.assertRaisesRegex(ValueError, "duplicate GIF panel"):
+    def test_duplicate_graphics_panel_is_rejected(self):
+        path = self.put(content=SCENE + "UW1=" + GIF + "\nUW1=" + GIF + "\n")
+        with self.assertRaisesRegex(ValueError, "duplicate graphics panel"):
             canonicalize_and_validate(path, path.read_text())
 
     def test_all_six_short_gif_tags_are_valid(self):
-        tags = ("GF", "GC", "GW1", "GW2", "GW3", "GW4")
+        tags = ("UF", "UC", "UW1", "UW2", "UW3", "UW4")
         path = self.put(content=SCENE + "".join(f"{tag}={GIF}\n" for tag in tags))
         _, generated, count = canonicalize_and_validate(path, path.read_text())
         self.assertEqual(count, 1)
@@ -91,9 +113,55 @@ class ChunkGeneratorTests(unittest.TestCase):
             self.assertIn(f"{tag}={GIF}", generated)
 
     def test_old_long_gif_tag_is_rejected(self):
-        path = self.put(content=SCENE + "GIFW1=" + GIF + "\n")
-        with self.assertRaisesRegex(ValueError, "unknown GIF panel"):
+        path = self.put(content=SCENE + "GW1=" + GIF + "\n")
+        with self.assertRaisesRegex(ValueError, "unknown panel"):
             canonicalize_and_validate(path, path.read_text())
+
+    def test_bare_live_stream_url_with_player_options(self):
+        path = self.put(content=SCENE + "UW1=" + STREAM + "\n")
+        _, generated, _ = canonicalize_and_validate(path, path.read_text())
+        self.assertIn("UW1=" + STREAM, generated)
+
+    def test_tiled_gif_and_query_string(self):
+        path = self.put(content=SCENE + "UW1=" + GIF + "|4|4\n"
+                        + "UO2=https://example.net/tiles/animated.gif?cache=7|2|3\n")
+        _, generated, _ = canonicalize_and_validate(path, path.read_text())
+        self.assertIn("UW1=" + GIF + "|4|4", generated)
+
+    def test_tiling_must_be_positive_bounded_and_gif(self):
+        for suffix in ("|0|4", "|33|4", "|4|no", "|4", "|4|4|4"):
+            with self.subTest(suffix=suffix):
+                path = self.put(content=SCENE + "UW1=" + GIF + suffix + "\n")
+                with self.assertRaisesRegex(ValueError, "tiling"):
+                    canonicalize_and_validate(path, path.read_text())
+        path = self.put(content=SCENE + "UW1=" + STREAM + "|2|2\n")
+        with self.assertRaisesRegex(ValueError, "only supported for GIF"):
+            canonicalize_and_validate(path, path.read_text())
+
+    def test_long_gif_address_rejected_before_publishing(self):
+        long_gif = "https://example.com/" + "a" * 780 + ".gif"
+        path = self.put(content=SCENE + "UW1=" + long_gif + "\n")
+        with self.assertRaisesRegex(ValueError, "1024-byte URL limit"):
+            canonicalize_and_validate(path, path.read_text())
+
+    def test_short_and_legacy_outside_tags_are_equivalent(self):
+        for outside in ("O1", "OW1"):
+            with self.subTest(outside=outside):
+                path = self.put(content=SCENE + outside + "=" + PANEL + "\n")
+                canonicalize_and_validate(path, path.read_text())
+        path = self.put(content=SCENE + "O1=" + PANEL + "\nOW1=" + PANEL + "\n")
+        with self.assertRaisesRegex(ValueError, "duplicate outside"):
+            canonicalize_and_validate(path, path.read_text())
+
+    def test_twenty_four_scene_records_are_allowed(self):
+        inside = ("UF", "UC", "UW1", "UW2", "UW3", "UW4")
+        outside = ("UOF", "UOC", "UO1", "UO2", "UO3", "UO4")
+        exterior = ("OF", "OC", "O1", "O2", "O3", "O4")
+        content = SCENE + "".join(t + "=" + PANEL + "\n" for t in exterior)
+        content += "".join(t + "=" + GIF + "\n" for t in inside + outside)
+        path = self.put(content=content)
+        _, generated, _ = canonicalize_and_validate(path, path.read_text())
+        self.assertIn("UO4=" + GIF, generated)
 
     def test_pack_order_and_complete_regeneration(self):
         self.put("A")
