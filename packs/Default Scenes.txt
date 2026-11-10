@@ -1,9 +1,3 @@
-VERSION=0
-PACK=Default Scenes
-# BOX-SCENES manufacturers library
-# F/C/W1/W2/W3/W4 = floor/ceiling/walls
-#54 scenes
-
 [Transparent]
 F=8dcd4a48-2d37-4909-9f78-f7a9eb4ef903|<1,10.5,0>|<0,0,0>|0|<0.3451,0.3451,0.3451>|1|0
 C=8dcd4a48-2d37-4909-9f78-f7a9eb4ef903|<1,0.6,0>|<0,0,0>|0|<0.48235,0.48235,0.48235>|1|0
