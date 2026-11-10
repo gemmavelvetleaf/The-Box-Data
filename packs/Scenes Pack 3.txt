@@ -349,5 +349,5 @@ C=82921dbe-cd25-23d9-1f8d-8dabef47fbc6|<1,1,0>|<0,0,0>|0|<1,1,1>|1|1
 W1=c2a90a05-4665-4870-0f89-a8ebb989f3b2|<0.85,0.8,0>|<0,0.099979,0>|0|<1,1,1>|1|1
 W2=c2a90a05-4665-4870-0f89-a8ebb989f3b2|<0.85,0.8,0>|<0,0.099979,0>|0|<1,1,1>|1|1
 W3=c2a90a05-4665-4870-0f89-a8ebb989f3b2|<0.85,0.8,0>|<0,0.099979,0>|0|<1,1,1>|1|1
-UW4=https://github.com/gemmavelvetleaf/The-Box-Data/main/GIF/mind.gif|4|4
+UW4=https://raw.githubusercontent.com/gemmavelvetleaf/The-Box-Data/main/GIF/mind.gif|4|4
 W4=c2a90a05-4665-4870-0f89-a8ebb989f3b2|<0.85,0.8,0>|<0,0.099979,0>|0|<1,1,1>|1|1
