@@ -1,4 +1,4 @@
-VERSION=hd3354254370b
+VERSION=h67f44cb27aff
 PACK=Scenes Pack 1
 
 [Photo Studio]
