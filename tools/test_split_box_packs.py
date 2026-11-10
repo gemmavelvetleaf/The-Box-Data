@@ -14,6 +14,7 @@ UUID = "c7a4e9ff-3a9c-aef0-0481-5f14d6ac2fd4"
 PANEL = f"{UUID}|<1,1,0>|<0,0,0>|0|<1,1,1>|1|1"
 SCENE = "[One]\n" + "\n".join(f"{p}={PANEL}" for p in
                                      ("F", "C", "W1", "W2", "W3", "W4")) + "\n"
+GIF = "https://github.com/gemmavelvetleaf/The-Box-Data/blob/main/GIF/People%20Machine.gif"
 
 
 class ChunkGeneratorTests(unittest.TestCase):
@@ -62,6 +63,36 @@ class ChunkGeneratorTests(unittest.TestCase):
     def test_invalid_uuid_rejected(self):
         path = self.put(content=SCENE.replace(UUID, "no-texture"))
         with self.assertRaisesRegex(ValueError, "invalid texture UUID"):
+            canonicalize_and_validate(path, path.read_text())
+
+    def test_gif_and_outside_tags_can_share_panel(self):
+        source = SCENE + "OW1=" + PANEL + "\nGW1=" + GIF + "\n"
+        path = self.put(content=source)
+        _, generated, count = canonicalize_and_validate(path, path.read_text())
+        self.assertEqual(count, 1)
+        self.assertIn("GW1=" + GIF, generated)
+
+    def test_bad_gif_url_is_rejected(self):
+        path = self.put(content=SCENE + "GW1=https://example.com/photo.gif\n")
+        with self.assertRaisesRegex(ValueError, "invalid GitHub GIF URL"):
+            canonicalize_and_validate(path, path.read_text())
+
+    def test_duplicate_gif_panel_is_rejected(self):
+        path = self.put(content=SCENE + "GW1=" + GIF + "\nGW1=" + GIF + "\n")
+        with self.assertRaisesRegex(ValueError, "duplicate GIF panel"):
+            canonicalize_and_validate(path, path.read_text())
+
+    def test_all_six_short_gif_tags_are_valid(self):
+        tags = ("GF", "GC", "GW1", "GW2", "GW3", "GW4")
+        path = self.put(content=SCENE + "".join(f"{tag}={GIF}\n" for tag in tags))
+        _, generated, count = canonicalize_and_validate(path, path.read_text())
+        self.assertEqual(count, 1)
+        for tag in tags:
+            self.assertIn(f"{tag}={GIF}", generated)
+
+    def test_old_long_gif_tag_is_rejected(self):
+        path = self.put(content=SCENE + "GIFW1=" + GIF + "\n")
+        with self.assertRaisesRegex(ValueError, "unknown GIF panel"):
             canonicalize_and_validate(path, path.read_text())
 
     def test_pack_order_and_complete_regeneration(self):
