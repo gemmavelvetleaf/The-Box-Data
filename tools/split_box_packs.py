@@ -16,13 +16,18 @@ from pathlib import Path
 
 MAX_CHUNK_BYTES = 3000
 MAX_SCENES = 54
-MAX_SCENE_LINES = 12
+MAX_SCENE_LINES = 18  # six core + six outside/mirror + six optional GIF tags
 MAX_PACKS = 24
 CORE = {"F": 0, "FLOOR": 0, "C": 1, "CEILING": 1,
         "W1": 2, "WALL1": 2, "W2": 3, "WALL2": 3,
         "W3": 4, "WALL3": 4, "W4": 5, "WALL4": 5}
 UUID = re.compile(r"[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}\Z")
 NUMBER = re.compile(r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?\Z")
+GIF_URL = re.compile(
+    r"https://(?:github\.com/[^/\s]+/[^/\s]+/blob/[^/\s]+/[^\s]+\.gif"
+    r"|raw\.githubusercontent\.com/[^/\s]+/[^/\s]+/[^/\s]+/[^\s]+\.gif)\Z",
+    re.IGNORECASE,
+)
 
 
 def error(message: str) -> None:
@@ -77,6 +82,7 @@ def canonicalize_and_validate(path: Path, source: str) -> tuple[str, str, int]:
     names: set[str] = set()
     core_seen: set[int] = set()
     optional_seen: set[int] = set()
+    gif_seen: set[int] = set()
     scene_lines = 0
 
     def finish_scene(at_line: int) -> None:
@@ -112,6 +118,7 @@ def canonicalize_and_validate(path: Path, source: str) -> tuple[str, str, int]:
             scene_lines = 0
             core_seen = set()
             optional_seen = set()
+            gif_seen = set()
             body.append(line)
             continue
         if not scene_started:
@@ -137,7 +144,17 @@ def canonicalize_and_validate(path: Path, source: str) -> tuple[str, str, int]:
             check_spec(spec, place)
         else:
             panel = -1
-            if tag.endswith("_MIRROR"):
+            if tag.startswith("G"):
+                panel = CORE.get(tag[1:], -1)
+                if panel < 0:
+                    error(f"{place}: unknown GIF panel {tag!r}")
+                if (len(spec) > 500 or not GIF_URL.fullmatch(spec)
+                        or any(c in spec for c in ('<', '>', '"', "'"))):
+                    error(f"{place}: invalid GitHub GIF URL {spec!r}")
+                if panel in gif_seen:
+                    error(f"{place}: duplicate GIF panel {tag}")
+                gif_seen.add(panel)
+            elif tag.endswith("_MIRROR"):
                 panel = CORE.get(tag[:-7], -1)
                 if spec.upper() != "ON":
                     error(f"{place}: mirror setting must be ON")
@@ -147,9 +164,10 @@ def canonicalize_and_validate(path: Path, source: str) -> tuple[str, str, int]:
                     check_spec(spec, place)
             if panel < 0:
                 error(f"{place}: unknown panel {tag!r}")
-            if panel in optional_seen:
-                error(f"{place}: duplicate outside/mirror panel {tag}")
-            optional_seen.add(panel)
+            if not tag.startswith("G"):
+                if panel in optional_seen:
+                    error(f"{place}: duplicate outside/mirror panel {tag}")
+                optional_seen.add(panel)
         scene_lines += 1
         if scene_lines > MAX_SCENE_LINES:
             error(f"{place}: exceeded {MAX_SCENE_LINES} lines per scene")
