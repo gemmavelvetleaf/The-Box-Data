@@ -11,23 +11,25 @@ import hashlib
 import math
 import os
 import re
+import sys
 import tempfile
 from pathlib import Path
+from urllib.parse import quote, urlsplit
 
 MAX_CHUNK_BYTES = 3000
 MAX_SCENES = 54
-MAX_SCENE_LINES = 18  # six core + six outside/mirror + six optional GIF tags
+MAX_SCENE_LINES = 24  # 6 core + 6 outside/mirror + 6 inside G + 6 outside G
 MAX_PACKS = 24
 CORE = {"F": 0, "FLOOR": 0, "C": 1, "CEILING": 1,
         "W1": 2, "WALL1": 2, "W2": 3, "WALL2": 3,
         "W3": 4, "WALL3": 4, "W4": 5, "WALL4": 5}
 UUID = re.compile(r"[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}\Z")
 NUMBER = re.compile(r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?\Z")
-GIF_URL = re.compile(
-    r"https://(?:github\.com/[^/\s]+/[^/\s]+/blob/[^/\s]+/[^\s]+\.gif"
-    r"|raw\.githubusercontent\.com/[^/\s]+/[^/\s]+/[^/\s]+/[^\s]+\.gif)\Z",
-    re.IGNORECASE,
-)
+MAX_TILE_REPEAT = 32
+URL_PANEL = {"UF": (0, False), "UC": (1, False),
+             "UOF": (0, True), "UOC": (1, True),
+             **{f"UW{i}": (i + 1, False) for i in range(1, 5)},
+             **{f"UO{i}": (i + 1, True) for i in range(1, 5)}}
 
 
 def error(message: str) -> None:
@@ -70,6 +72,49 @@ def check_spec(value: str, location: str) -> None:
         error(f"{location}: fullbright must be 0 or 1")
 
 
+def check_graphics_url(value: str, location: str) -> None:
+    """Accept HTTP(S) media pages unchanged; only GIFs can specify tiling."""
+    if len(value.encode("utf-8")) > 1024 or not value or any(
+        ord(c) < 33 or c in '<>"\'' for c in value
+    ):
+        error(f"{location}: invalid graphics URL {value!r}")
+
+    raw_url = value
+    across, down = 1, 1
+    if "|" in value:
+        pieces = value.split("|")
+        if len(pieces) != 3 or any(
+            not p.isascii() or not p.isdecimal() or not 1 <= int(p) <= MAX_TILE_REPEAT
+            for p in pieces[1:]
+        ):
+            error(f"{location}: invalid GIF tiling; expected URL|across|down (1-32)")
+        raw_url = pieces[0]
+        across, down = int(pieces[1]), int(pieces[2])
+        if not urlsplit(raw_url).path.lower().endswith(".gif"):
+            error(f"{location}: tiling is only supported for GIF images")
+
+    try:
+        parsed = urlsplit(raw_url)
+        if parsed.scheme not in ("http", "https") or not parsed.hostname:
+            error(f"{location}: graphics URL must be an HTTP(S) address with a hostname")
+        # Force malformed ports to fail validation as well.
+        _ = parsed.port
+    except ValueError as exc:
+        error(f"{location}: invalid graphics URL {value!r}: {exc}")
+
+    if parsed.path.lower().endswith(".gif"):
+        gif = raw_url
+        if gif.startswith("https://github.com/") and "/blob/" in gif:
+            gif = "https://raw.githubusercontent.com/" + gif[19:].replace("/blob/", "/", 1)
+        style = (f"background-image:url('{gif}');background-repeat:repeat;"
+                 f"background-size:{100.0 / across:.6f}% {100.0 / down:.6f}%")
+        html = ("<html><head><meta name='viewport' content='width=device-width,initial-scale=1'>"
+                "</head><body style=\"margin:0;background-color:black;" + style
+                + ";height:100vh;width:100vw;overflow:hidden\"></body></html>")
+        if len(("data:text/html," + quote(html, safe="")).encode("utf-8")) > 1024:
+            error(f"{location}: GIF media page exceeds Second Life's 1024-byte URL limit; use a shorter GIF URL")
+
+
 def canonicalize_and_validate(path: Path, source: str) -> tuple[str, str, int]:
     name = path.stem
     if not name or name != name.strip() or "|" in name:
@@ -83,6 +128,7 @@ def canonicalize_and_validate(path: Path, source: str) -> tuple[str, str, int]:
     core_seen: set[int] = set()
     optional_seen: set[int] = set()
     gif_seen: set[int] = set()
+    outside_g_seen: set[int] = set()
     scene_lines = 0
 
     def finish_scene(at_line: int) -> None:
@@ -119,6 +165,7 @@ def canonicalize_and_validate(path: Path, source: str) -> tuple[str, str, int]:
             core_seen = set()
             optional_seen = set()
             gif_seen = set()
+            outside_g_seen = set()
             body.append(line)
             continue
         if not scene_started:
@@ -144,27 +191,29 @@ def canonicalize_and_validate(path: Path, source: str) -> tuple[str, str, int]:
             check_spec(spec, place)
         else:
             panel = -1
-            if tag.startswith("G"):
-                panel = CORE.get(tag[1:], -1)
+            if tag.startswith("U"):
+                panel, outside_g = URL_PANEL.get(tag, (-1, False))
                 if panel < 0:
-                    error(f"{place}: unknown GIF panel {tag!r}")
-                if (len(spec) > 500 or not GIF_URL.fullmatch(spec)
-                        or any(c in spec for c in ('<', '>', '"', "'"))):
-                    error(f"{place}: invalid GitHub GIF URL {spec!r}")
-                if panel in gif_seen:
-                    error(f"{place}: duplicate GIF panel {tag}")
-                gif_seen.add(panel)
+                    error(f"{place}: unknown graphics panel {tag!r}")
+                check_graphics_url(spec, place)
+                target = outside_g_seen if outside_g else gif_seen
+                if panel in target:
+                    error(f"{place}: duplicate graphics panel {tag}")
+                target.add(panel)
             elif tag.endswith("_MIRROR"):
                 panel = CORE.get(tag[:-7], -1)
                 if spec.upper() != "ON":
                     error(f"{place}: mirror setting must be ON")
             elif tag.startswith("O"):
-                panel = CORE.get(tag[1:], -1)
+                suffix = tag[1:]
+                if suffix in ("1", "2", "3", "4"):
+                    suffix = "W" + suffix
+                panel = CORE.get(suffix, -1)
                 if panel >= 0:
                     check_spec(spec, place)
             if panel < 0:
                 error(f"{place}: unknown panel {tag!r}")
-            if not tag.startswith("G"):
+            if not tag.startswith("U"):
                 if panel in optional_seen:
                     error(f"{place}: duplicate outside/mirror panel {tag}")
                 optional_seen.add(panel)
@@ -273,7 +322,33 @@ def main() -> None:
     try:
         build(args.root.resolve())
     except (ValueError, OSError, UnicodeError) as exc:
-        raise SystemExit(f"ERROR: {exc}") from exc
+        reason = str(exc)
+        print("\n" + "=" * 72, file=sys.stderr)
+        print("THE BOX SCENE PACK BUILD FAILED — NO NEW SCENES WERE PUBLISHED", file=sys.stderr)
+        print("Fix this error and commit again:", file=sys.stderr)
+        print(reason, file=sys.stderr)
+        print("Previous generated scene data is preserved.\n" + "=" * 72,
+              file=sys.stderr)
+        match = re.match(r"(.+?\.txt):(\d+)(?: \[.*?\])?: (.+)", reason)
+        annotation = reason
+        if match:
+            path, line, detail = match.groups()
+            try:
+                path = str(Path(path).relative_to(args.root.resolve()))
+            except ValueError:
+                pass
+            annotation = f"file={path},line={line}::" + detail
+            print("::error " + annotation, file=sys.stderr)
+        else:
+            print("::error::" + annotation, file=sys.stderr)
+        summary = os.getenv("GITHUB_STEP_SUMMARY")
+        if summary:
+            with Path(summary).open("a", encoding="utf-8") as report:
+                report.write("## ❌ The Box scene pack update failed\n\n")
+                report.write("The new scene data was **not published**. ")
+                report.write("The previous generated version is still available.\n\n")
+                report.write("**Fix:** `" + reason.replace("`", "'") + "`\n")
+        raise SystemExit(1) from exc
 
 
 if __name__ == "__main__":
