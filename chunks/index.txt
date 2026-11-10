@@ -2,5 +2,5 @@
 Default Scenes|h8a5176c834f2|9
 Scenes Pack 1|hd3354254370b|9
 Scenes Pack 2|h81df78a3150b|9
-Scenes Pack 3|hf793f06fc269|6
+Scenes Pack 3|hc04fd010c3c4|8
 Windows|h82d24921be53|4
