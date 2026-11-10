@@ -1,6 +1,6 @@
 # AUTO-GENERATED - DO NOT EDIT
-Default Red Dudes|h9ffb82b4ac82|9
 Default Scenes|h085d36e73790|9
 Scenes Pack 1|hd3354254370b|9
 Scenes Pack 2|h81df78a3150b|9
 Scenes Pack 3|hf793f06fc269|6
+Windows|h14840d8c9c0a|4
