@@ -1,9 +1,3 @@
-VERSION=0
-PACK=Scenes Pack 2
-# BOX-SCENES manufacturers library
-# F/C/W1/W2/W3/W4 = floor/ceiling/walls
-# 54 Scenes
-
 [Palms on Red]
 F=22aca67a-946a-fae7-448c-8da90265b34a|<1,0.97,0>|<0,0,0>|0|<1,1,1>|1|0
 C=55152b58-4b43-45f8-1411-5b2aeffdb515|<0.8,0.8,0>|<-0.100009,0.099979,0>|0.017449|<0.988235,0.67451,0.67451>|1|0
