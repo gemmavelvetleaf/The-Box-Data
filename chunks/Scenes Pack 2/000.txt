@@ -1,10 +1,6 @@
-CHUNK=1/10|e0b050949d08f60f33ebf786c52aa72847e17f0b4dcbc2bc0c42b5f1e28eb1cb
-VERSION=h81df78a3150b
+CHUNK=1/10|5d39cd420e8090bbc5421e2e58fc0a360585bb42074099f0c1c16eed00d3cf7f
+VERSION=h94caaf691553
 PACK=Scenes Pack 2
-
-# BOX-SCENES manufacturers library
-# F/C/W1/W2/W3/W4 = floor/ceiling/walls
-# 54 Scenes
 
 [Palms on Red]
 F=22aca67a-946a-fae7-448c-8da90265b34a|<1,0.97,0>|<0,0,0>|0|<1,1,1>|1|0
@@ -49,3 +45,4 @@ W4=c2778da5-c24b-88b3-bc79-fc40721e189b|<1,1,0>|<0,0,0>|0|<0.788235,0.788235,0.7
 [Torn Wallpaper]
 F=09b04244-9569-d21f-6de0-4bbcf5552222|<24.2,24,0>|<0,0,0>|1.570796|<0.81569,0.81569,0.81569>|1|0
 C=e9d13763-e68b-d231-f764-ef009b3afa23|<1,1,0>|<0,0,0>|0|<0.77255,0.77255,0.77255>|1|0
+W1=8e912522-a1eb-fc39-0bc8-419a52a881c7|<1,0.5,0>|<0,0.19999,0>|0|<1,1,1>|1|0

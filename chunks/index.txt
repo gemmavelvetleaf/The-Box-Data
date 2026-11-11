@@ -1,6 +1,6 @@
 # AUTO-GENERATED - DO NOT EDIT
 Default Scenes|h8a5176c834f2|10
 Scenes Pack 1|h67f44cb27aff|9
-Scenes Pack 2|h81df78a3150b|10
+Scenes Pack 2|h94caaf691553|10
 Scenes Pack 3|hc92952a0aa1f|8
 Windows|h82d24921be53|4
