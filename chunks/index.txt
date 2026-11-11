@@ -1,7 +1,7 @@
 # AUTO-GENERATED - DO NOT EDIT
-Brick & Stone|hd2cdafa69210|4
 Default Scenes|h8a5176c834f2|10
+Brick & Stone|hd2cdafa69210|4
+Windows|h82d24921be53|4
 Scenes Pack 1|h39f29e1df1c0|9
 Scenes Pack 2|h94caaf691553|10
 Scenes Pack 3|hdae30901a09c|8
-Windows|h82d24921be53|4
