@@ -4,7 +4,7 @@
 20|Brick & Stone
 25|Windows
 30|Clouds & Sky
-33|Rooms
+33|Indoors
 34|Outdoors
 35|Holidays
 40|Animations
