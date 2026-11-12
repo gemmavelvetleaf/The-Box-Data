@@ -20,6 +20,8 @@ MAX_CHUNK_BYTES = 3000
 # Leave room for CHUNK=index/count|sha256\n on each response.
 MAX_PAYLOAD_BYTES = MAX_CHUNK_BYTES - 90
 MAX_SCENES = 54
+# Button prefix is up to "54:" (3 characters) out of 24.
+MAX_MENU_ALIAS = 21
 MAX_SCENE_LINES = 24  # 6 core + 6 outside/mirror + 6 inside G + 6 outside G
 MAX_PACKS = 24
 CORE = {"F": 0, "FLOOR": 0, "C": 1, "CEILING": 1,
@@ -117,16 +119,53 @@ def check_graphics_url(value: str, location: str) -> None:
             error(f"{location}: GIF media page exceeds Second Life's 1024-byte URL limit; use a shorter GIF URL")
 
 
+def make_scene_aliases(source: str, path: Path) -> dict[str, str]:
+    """Unique, stable menu labels; keep full canonical names in scene headings."""
+    headers: list[tuple[str, int]] = []
+    seen_full: set[str] = set()
+    for lineno, raw in enumerate(source.split("\n"), 1):
+        line = raw.strip()
+        if line.startswith("[") and line.endswith("]"):
+            name = line[1:-1].strip()
+            if not name:
+                error(f"{path}:{lineno}: blank scene name")
+            if name.casefold() in seen_full:
+                error(f"{path}:{lineno}: duplicate scene name: {name}")
+            seen_full.add(name.casefold())
+            headers.append((name, lineno))
+    # Reserve all existing short labels first so hashed long labels can never
+    # displace an unchanged short scene name.
+    used = {name.casefold() for name, _ in headers if len(name) <= MAX_MENU_ALIAS}
+    aliases: dict[str, str] = {}
+    for name, lineno in headers:
+        if len(name) <= MAX_MENU_ALIAS:
+            aliases[name] = name
+            continue
+        digest = hashlib.sha256(name.encode("utf-8")).hexdigest()
+        for digits in range(5, len(digest) + 1):
+            head = MAX_MENU_ALIAS - digits - 1
+            if head < 0:
+                break
+            alias = name[:head] + "~" + digest[:digits]
+            if alias.casefold() not in used:
+                aliases[name] = alias
+                used.add(alias.casefold())
+                break
+        if name not in aliases:
+            error(f"{path}:{lineno}: cannot assign unique menu label: {name}")
+    return aliases
+
+
 def canonicalize_and_validate(path: Path, source: str) -> tuple[str, str, int]:
     name = path.stem
     if not name or name != name.strip() or "|" in name:
         error(f"{path}: invalid pack filename")
     source = source.lstrip("\ufeff").replace("\r\n", "\n").replace("\r", "\n")
+    aliases = make_scene_aliases(source, path)
     body: list[str] = []
     scene_name = ""
     scene_started = False
     scenes = 0
-    names: set[str] = set()
     core_seen: set[int] = set()
     optional_seen: set[int] = set()
     gif_seen: set[int] = set()
@@ -153,15 +192,9 @@ def canonicalize_and_validate(path: Path, source: str) -> tuple[str, str, int]:
             scene_name = line[1:-1].strip()
             if not scene_name:
                 error(f"{place}: blank scene name")
-            short_name = scene_name[:24].casefold()
-            if short_name in names:
-                error(f"{place}: duplicate scene name after menu truncation: {scene_name}")
-            names.add(short_name)
             scenes += 1
             if scenes > MAX_SCENES:
                 error(f"{place}: exceeded {MAX_SCENES} scenes per pack")
-            if len(scene_name) > 24:
-                print(f"WARNING: {place}: menu truncates name {scene_name!r}")
             scene_started = True
             scene_lines = 0
             core_seen = set()
@@ -169,6 +202,12 @@ def canonicalize_and_validate(path: Path, source: str) -> tuple[str, str, int]:
             gif_seen = set()
             outside_g_seen = set()
             body.append(line)
+            alias = aliases[scene_name]
+            if alias != scene_name:
+                # The LSL loader consumes ALIAS= as metadata, not a scene panel.
+                # The original [canonical name] remains available in-world.
+                body.append("ALIAS=" + alias)
+                print(f"MENU LABEL: {path.name}: {scene_name!r} -> {alias!r}")
             continue
         if not scene_started:
             if line and not line.startswith(("#", "//")):
