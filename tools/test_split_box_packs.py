@@ -73,6 +73,25 @@ class ChunkGeneratorTests(unittest.TestCase):
         self.assertIn("::error file=packs/Pasture.txt,line=", run.stderr)
         self.assertIn("The Box scene pack update failed", summary.read_text())
 
+    def test_long_scene_name_preserves_canonical_and_unique_aliases(self):
+        one = "White Room Wide Window TR"
+        two = "White Room Wide Window Transparent"
+        path = self.put(content=SCENE.replace("[One]", f"[{one}]") + "\n"
+                        + SCENE.replace("[One]", f"[{two}]") + "\n")
+        _, generated, count = canonicalize_and_validate(path, path.read_text())
+        self.assertEqual(count, 2)
+        self.assertIn(f"[{one}]\nALIAS=", generated)
+        self.assertIn(f"[{two}]\nALIAS=", generated)
+        aliases = [line[6:] for line in generated.splitlines() if line.startswith("ALIAS=")]
+        self.assertEqual(len(aliases), 2)
+        self.assertNotEqual(aliases[0].casefold(), aliases[1].casefold())
+        self.assertTrue(all(len(alias) <= 21 for alias in aliases))
+
+    def test_short_names_stay_unchanged(self):
+        path = self.put()
+        _, generated, _ = canonicalize_and_validate(path, path.read_text())
+        self.assertNotIn("ALIAS=", generated)
+
     def test_duplicate_name_rejected(self):
         path = self.put(content=SCENE + "\n" + SCENE)
         with self.assertRaisesRegex(ValueError, "duplicate scene name"):
