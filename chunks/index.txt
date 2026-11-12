@@ -1,5 +1,6 @@
 # AUTO-GENERATED - DO NOT EDIT
 Defaults|hcc3fd4b7f797|1
+Patterns|h290557b8f23f|1
 Psychedelic|h3a03b96376b8|1
 Brick & Stone|h4f08bf0258c9|4
 Windows|h119bcb394f9b|4
@@ -8,8 +9,8 @@ Indoors|h6c542edb6523|6
 Outdoors|h7e141e41d81b|4
 Holidays|hacdfcd6992df|3
 Animations|h85bc8cb24d19|1
-Scenes Pack 1|h223817e32773|10
-Scenes Pack 2|heaaaead4919c|10
-Scenes Pack 3|h906287d7fb50|8
-Scenes Pack 4|h50e54019ec93|1
+Scenes Pack 1|hb6d3c23bc6e4|3
+Scenes Pack 2|h472b803e1751|9
+Scenes Pack 3|h0fb0d164d411|7
+Scenes Pack 4|h8fb3959846b3|1
 Abstract|h65edf156b5ab|1
