@@ -3,6 +3,7 @@ Default Scenes|hea9b5cb1aaa6|10
 Psychodelic|hfb0f7bc9bcb8|1
 Brick & Stone|h4f08bf0258c9|4
 Windows|h119bcb394f9b|4
+Outdoors|h1ce21fcfe40a|2
 Holidays|hacdfcd6992df|3
 Animations|h85bc8cb24d19|1
 Scenes Pack 1|h223817e32773|10
