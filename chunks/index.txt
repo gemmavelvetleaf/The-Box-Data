@@ -2,6 +2,7 @@
 Defaults|hcc3fd4b7f797|1
 Brick & Stone|h4f08bf0258c9|4
 Windows|h119bcb394f9b|4
+Indoors|h47c3fc2f83ca|4
 Outdoors|he38d61e35bd6|2
 Holidays|hacdfcd6992df|3
 Animations|h85bc8cb24d19|1
