@@ -3,7 +3,7 @@
 15|Psychedelic
 20|Brick & Stone
 25|Windows
-30|Clouds & Sky
+30|Clouds & Skies
 35|Indoors
 40|Outdoors
 50|Holidays
