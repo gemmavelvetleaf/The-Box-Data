@@ -271,6 +271,25 @@ def canonicalize_and_validate(path: Path, source: str) -> tuple[str, str, int]:
     return version, f"VERSION={version}\nPACK={name}\n\n" + payload, scenes
 
 
+
+def is_unpopulated_placeholder(source: str) -> bool:
+    """Allow a reserved pack file with no scene data yet.
+
+    Only blank lines, comments, and optional legacy VERSION=/PACK= headers
+    qualify. Any other content (including an incomplete [Scene] or stray
+    F= line) must still go through normal validation and fail if malformed.
+    """
+    source = source.lstrip("\ufeff").replace("\r\n", "\n").replace("\r", "\n")
+    for raw in source.splitlines():
+        line = raw.strip()
+        if not line or line.startswith(("#", "//")):
+            continue
+        if line.upper().startswith(("VERSION=", "PACK=")):
+            continue
+        return False
+    return True
+
+
 def split_line_aligned(text: str, path: Path) -> list[str]:
     chunks: list[str] = []
     current: list[str] = []
@@ -289,7 +308,7 @@ def split_line_aligned(text: str, path: Path) -> list[str]:
     return chunks
 
 
-def read_order(path: Path, names: set[str]) -> dict[str, int]:
+def read_order(path: Path, names: set[str], placeholders: set[str] | None = None) -> dict[str, int]:
     """Order existing packs; reserve future pack names without failing builds."""
     if not path.exists():
         return {}
@@ -312,8 +331,9 @@ def read_order(path: Path, names: set[str]) -> dict[str, int]:
         used_names.add(name)
         used_positions.add(position)
         if name not in names:
-            print(f"PLANNED PACK — SKIPPED: {name}.txt not found in packs/ "
-                  f"(pack-order.txt line {lineno}); will be included when created")
+            if name not in (placeholders or set()):
+                print(f"PLANNED PACK — SKIPPED: {name}.txt not found in packs/ "
+                      f"(pack-order.txt line {lineno}); will be included when created")
             continue
         result[name] = position
     return result
@@ -323,22 +343,37 @@ def build(root: Path) -> None:
     packs, out = root / "packs", root / "chunks"
     if not packs.is_dir():
         error(f"missing {packs}")
-    files = sorted(packs.glob("*.txt"), key=lambda p: p.name.casefold())
-    if not files:
+    source_files = sorted(packs.glob("*.txt"), key=lambda p: p.name.casefold())
+    if not source_files:
         error("no source packs/*.txt found")
-    if len(files) > MAX_PACKS:
-        error(f"{len(files)} packs exceeds the {MAX_PACKS}-pack menu limit")
-    if len({p.stem.casefold() for p in files}) != len(files):
+    if len({p.stem.casefold() for p in source_files}) != len(source_files):
         error("pack filenames collide ignoring case")
-    order = read_order(root / "pack-order.txt", {p.stem for p in files})
+
+    # A future pack's blank/comment-only .txt is a placeholder, not an error.
+    # Importantly, never skip an incomplete scene or other malformed content.
+    sources: dict[Path, str] = {}
+    placeholders: set[str] = set()
+    for path in source_files:
+        source = path.read_text(encoding="utf-8")
+        if is_unpopulated_placeholder(source):
+            placeholders.add(path.stem)
+            print(f"PLANNED PACK — SKIPPED: {path.name} exists but has no scenes yet")
+            continue
+        sources[path] = source
+    files = list(sources)
+    if not files:
+        error("no populated scene packs found; refusing to replace the last good index with an empty library")
+    if len(files) > MAX_PACKS:
+        error(f"{len(files)} populated packs exceeds the {MAX_PACKS}-pack menu limit")
+
+    order = read_order(root / "pack-order.txt", {p.stem for p in files}, placeholders)
     files.sort(key=lambda p: (0, order[p.stem]) if p.stem in order
                else (1, p.name.casefold()))
 
-    # Validate all packs before touching the last good generated output.
+    # Validate all populated packs before touching the last good generated output.
     records: list[tuple[str, str, list[str], int]] = []
     for path in files:
-        version, text, scenes = canonicalize_and_validate(
-            path, path.read_text(encoding="utf-8"))
+        version, text, scenes = canonicalize_and_validate(path, sources[path])
         records.append((path.stem, version, split_line_aligned(text, path), scenes))
 
     with tempfile.TemporaryDirectory(prefix="box-build-", dir=root) as directory:
