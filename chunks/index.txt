@@ -2,7 +2,7 @@
 Defaults|hcc3fd4b7f797|1
 Psychedelic|hd0923583a29c|2
 Brick & Stone|h4f08bf0258c9|4
-Windows|h119bcb394f9b|4
+Windows|h30a93370acb3|6
 Indoors|hc9909df38376|6
 Outdoors|he38d61e35bd6|2
 Holidays|hacdfcd6992df|3
