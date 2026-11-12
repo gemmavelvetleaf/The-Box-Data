@@ -1,14 +1,14 @@
-1|Default Scenes
+1|Defaults
 10|Patterns
-15|Psychodelic
+15|Psychedelic
 20|Brick & Stone
 25|Windows
 30|Clouds & Sky
-33|Indoors
-34|Outdoors
-35|Holidays
-40|Animations
-45|Scenes Pack 1
-50|Scenes Pack 2
-60|Scenes Pack 3
-70|Scenes Pack 4
+35|Indoors
+40|Outdoors
+50|Holidays
+60|Animations
+65|Scenes Pack 1
+70|Scenes Pack 2
+80|Scenes Pack 3
+90|Scenes Pack 4
