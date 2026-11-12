@@ -1,6 +1,6 @@
 # AUTO-GENERATED - DO NOT EDIT
 Defaults|hcc3fd4b7f797|1
-Psychedelic|hd0923583a29c|2
+Psychedelic|h3a03b96376b8|1
 Brick & Stone|h4f08bf0258c9|4
 Windows|h30a93370acb3|6
 Indoors|h6c542edb6523|6
