@@ -290,10 +290,12 @@ def split_line_aligned(text: str, path: Path) -> list[str]:
 
 
 def read_order(path: Path, names: set[str]) -> dict[str, int]:
+    """Order existing packs; reserve future pack names without failing builds."""
     if not path.exists():
         return {}
     result: dict[str, int] = {}
-    used: set[int] = set()
+    used_names: set[str] = set()
+    used_positions: set[int] = set()
     for lineno, raw in enumerate(path.read_text(encoding="utf-8-sig").splitlines(), 1):
         line = raw.strip()
         if not line or line.startswith("#"):
@@ -302,10 +304,18 @@ def read_order(path: Path, names: set[str]) -> dict[str, int]:
         if len(pieces) != 2 or not pieces[0].strip().isdigit():
             error(f"{path}:{lineno}: expected NUMBER|Pack Name")
         position, name = int(pieces[0]), pieces[1].strip()
-        if name not in names or name in result or position in used:
-            error(f"{path}:{lineno}: unknown/duplicate pack or position {name!r}")
+        if not name:
+            error(f"{path}:{lineno}: pack name cannot be blank")
+        # Treat duplicates as errors even when the pack is not created yet.
+        if name in used_names or position in used_positions:
+            error(f"{path}:{lineno}: duplicate pack name or position {name!r}")
+        used_names.add(name)
+        used_positions.add(position)
+        if name not in names:
+            print(f"PLANNED PACK — SKIPPED: {name}.txt not found in packs/ "
+                  f"(pack-order.txt line {lineno}); will be included when created")
+            continue
         result[name] = position
-        used.add(position)
     return result
 
 
