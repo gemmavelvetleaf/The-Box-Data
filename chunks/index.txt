@@ -1,5 +1,6 @@
 # AUTO-GENERATED - DO NOT EDIT
 Defaults|hcc3fd4b7f797|1
+Psychedelic|h51c97a6b4519|1
 Brick & Stone|h4f08bf0258c9|4
 Windows|h119bcb394f9b|4
 Indoors|h47c3fc2f83ca|4
@@ -10,4 +11,3 @@ Scenes Pack 1|h223817e32773|10
 Scenes Pack 2|heaaaead4919c|10
 Scenes Pack 3|h906287d7fb50|8
 Scenes Pack 4|h50e54019ec93|1
-Psychodelic|hfb0f7bc9bcb8|1
