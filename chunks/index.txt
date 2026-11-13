@@ -1,7 +1,7 @@
 # AUTO-GENERATED - DO NOT EDIT
 Defaults|hcc3fd4b7f797|1
 Patterns|h1bb441c830ae|8
-Psychedelic|h3a03b96376b8|1
+Psychedelic|h8c6308d10c8c|2
 Brick & Stone|h4f08bf0258c9|4
 Windows|h119bcb394f9b|4
 Clouds & Skies|hea8360f1fdda|2
