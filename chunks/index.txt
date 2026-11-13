@@ -1,6 +1,6 @@
 # AUTO-GENERATED - DO NOT EDIT
 Defaults|hcc3fd4b7f797|1
-Patterns|h78e13e29996f|5
+Patterns|hf70676ac8a08|6
 Psychedelic|h3a03b96376b8|1
 Brick & Stone|h4f08bf0258c9|4
 Windows|h119bcb394f9b|4
