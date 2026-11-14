@@ -1,5 +1,6 @@
 1|Defaults
 10|Patterns
+12|Patterns 2
 15|Psychedelic
 20|Brick & Stone
 25|Windows
