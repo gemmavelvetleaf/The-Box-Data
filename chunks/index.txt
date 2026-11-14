@@ -6,7 +6,7 @@ Brick & Stone|h4f08bf0258c9|4
 Windows|h119bcb394f9b|4
 Clouds & Skies|hea8360f1fdda|2
 Indoors|h6c542edb6523|6
-Outdoors|hab743782cc52|4
+Outdoors|hd0195112aeaf|4
 Holidays|h822620802985|6
 Animations|h85bc8cb24d19|1
 Scenes Pack 1|hb6d3c23bc6e4|3
