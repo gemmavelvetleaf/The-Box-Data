@@ -5,7 +5,7 @@ Psychedelic|h25a9c3cd7a3d|2
 Brick & Stone|h4f08bf0258c9|4
 Windows|h119bcb394f9b|4
 Clouds & Skies|hea8360f1fdda|2
-Indoors|h4d4d311b2cae|6
+Indoors|he126e0a4b948|6
 Outdoors|hd0195112aeaf|4
 Holidays|h822620802985|6
 Animations|h85bc8cb24d19|1
