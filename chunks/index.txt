@@ -8,7 +8,7 @@ Windows|h119bcb394f9b|4
 Clouds & Skies|hea8360f1fdda|2
 Indoors|he126e0a4b948|6
 Outdoors|hd0195112aeaf|4
-Holidays|h822620802985|6
+Holidays|ha87c165456c8|6
 Animations|h85bc8cb24d19|1
 Scenes Pack 1|hb6d3c23bc6e4|3
 Scenes Pack 2|h472b803e1751|9
