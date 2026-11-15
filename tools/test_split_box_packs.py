@@ -28,9 +28,14 @@ class ChunkGeneratorTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         (self.root / "packs").mkdir()
 
-    def put(self, name="Pasture", content=SCENE):
+    def put(self, name="Pasture", content=SCENE, *, listed=True):
         path = self.root / "packs" / (name + ".txt")
         path.write_text(content, encoding="utf-8")
+        order = self.root / "pack-order.txt"
+        if listed:
+            current = order.read_text(encoding="utf-8") if order.exists() else ""
+            if name not in current.splitlines():
+                order.write_text(current + name + "\n", encoding="utf-8")
         return path
 
     def test_old_headers_are_ignored_and_version_is_content_derived(self):
@@ -183,44 +188,125 @@ class ChunkGeneratorTests(unittest.TestCase):
         _, generated, _ = canonicalize_and_validate(path, path.read_text())
         self.assertIn("UO4=" + GIF, generated)
 
-    def test_pack_order_and_complete_regeneration(self):
+    def test_order_list_controls_both_inclusion_and_order(self):
         self.put("A")
         self.put("B")
-        (self.root / "pack-order.txt").write_text("10|B\n20|A\n")
+        self.put("C", listed=False)
+        (self.root / "pack-order.txt").write_text("B\nA\n", encoding="utf-8")
         build(self.root)
-        index = (self.root / "chunks" / "index.txt").read_text().splitlines()
-        self.assertEqual([row.split("|")[0] for row in index[1:]], ["B", "A"])
-        (self.root / "packs" / "B.txt").unlink()
-        (self.root / "pack-order.txt").unlink()
+        rows = (self.root / "chunks" / "index.txt").read_text().splitlines()
+        self.assertEqual([row.split("|")[0] for row in rows[1:]], ["B", "A"])
+        self.assertFalse((self.root / "chunks" / "C").exists())
+        (self.root / "pack-order.txt").write_text("A\n", encoding="utf-8")
         build(self.root)
         self.assertFalse((self.root / "chunks" / "B").exists())
         self.assertEqual(len((self.root / "chunks" / "index.txt").read_text().splitlines()), 2)
 
-    def test_future_pack_in_order_is_ignored_until_file_is_created(self):
+    def test_unlisted_invalid_packs_do_not_block_build(self):
         self.put("Existing")
-        (self.root / "pack-order.txt").write_text("10|Existing\n20|Future Pack\n")
+        self.put("Broken", "[Broken]\nF=bad\n", listed=False)
+        build(self.root)
+        self.assertNotIn("Broken|", (self.root / "chunks" / "index.txt").read_text())
+
+    def test_unlisted_files_do_not_count_toward_pack_limit(self):
+        self.put("Existing")
+        for i in range(30):
+            self.put(f"Unused {i:02}", listed=False)
+        build(self.root)
+        self.assertEqual(len((self.root / "chunks" / "index.txt").read_text().splitlines()), 2)
+
+    def test_future_pack_listed_without_file_is_error(self):
+        self.put("Existing")
+        (self.root / "pack-order.txt").write_text("Existing\nFuture Pack\n")
+        with self.assertRaisesRegex(ValueError, "does not exist"):
+            build(self.root)
+        self.put("Future Pack", listed=False)
+        build(self.root)
+        rows = (self.root / "chunks" / "index.txt").read_text().splitlines()
+        self.assertEqual([row.split("|")[0] for row in rows[1:]],
+                         ["Existing", "Future Pack"])
+
+    def test_empty_patterns_placeholder_is_skipped_without_error(self):
+        self.put("Existing")
+        self.put("Patterns", "")
         build(self.root)
         index = (self.root / "chunks" / "index.txt").read_text()
         self.assertIn("Existing|", index)
-        self.assertNotIn("Future Pack|", index)
-        self.assertFalse((self.root / "chunks" / "Future Pack").exists())
-        self.put("Future Pack")
+        self.assertNotIn("Patterns|", index)
+        self.assertFalse((self.root / "chunks" / "Patterns").exists())
+        self.put("Patterns", SCENE)
         build(self.root)
-        index = (self.root / "chunks" / "index.txt").read_text().splitlines()
-        self.assertEqual([row.split("|")[0] for row in index[1:]],
-                         ["Existing", "Future Pack"])
+        rows = (self.root / "chunks" / "index.txt").read_text().splitlines()
+        self.assertEqual([row.split("|")[0] for row in rows[1:]],
+                         ["Existing", "Patterns"])
+
+    def test_comment_only_and_legacy_headers_are_placeholders(self):
+        self.put("Existing")
+        self.put("Patterns", "# Future collection\n// Not ready\nVERSION=draft\nPACK=Patterns\n")
+        build(self.root)
+        self.assertNotIn("Patterns|", (self.root / "chunks" / "index.txt").read_text())
+
+    def test_incomplete_scene_is_not_ignored_as_placeholder(self):
+        self.put("Existing")
+        bad = self.put("Patterns", "[Unfinished]\nF=" + PANEL + "\n")
+        with self.assertRaisesRegex(ValueError, "missing"):
+            build(self.root)
+        bad.write_text("F=" + PANEL + "\n")
+        with self.assertRaisesRegex(ValueError, r"expected \[Scene Name\]"):
+            build(self.root)
+
+    def test_empty_placeholder_does_not_hide_duplicate_order(self):
+        self.put("Existing")
+        self.put("Patterns", "")
+        (self.root / "pack-order.txt").write_text("Existing\nPatterns\nPatterns\n")
+        with self.assertRaisesRegex(ValueError, "duplicate pack"):
+            build(self.root)
+
+    def test_only_placeholders_preserves_existing_index(self):
+        good = self.put("Patterns", SCENE)
+        build(self.root)
+        previous = (self.root / "chunks" / "index.txt").read_bytes()
+        good.write_text("")
+        with self.assertRaisesRegex(ValueError, "no populated scene packs"):
+            build(self.root)
+        self.assertEqual((self.root / "chunks" / "index.txt").read_bytes(), previous)
 
     def test_duplicate_planned_pack_name_is_rejected(self):
         self.put("Existing")
-        (self.root / "pack-order.txt").write_text("10|Future Pack\n20|Future Pack\n")
+        (self.root / "pack-order.txt").write_text("Existing\nFuture Pack\nFuture Pack\n")
         with self.assertRaisesRegex(ValueError, "duplicate pack"):
             build(self.root)
 
-    def test_duplicate_order_position_is_rejected_even_for_planned_packs(self):
+    def test_numbered_format_is_rejected_not_interpreted(self):
         self.put("Existing")
-        (self.root / "pack-order.txt").write_text("10|Future Pack\n10|Existing\n")
-        with self.assertRaisesRegex(ValueError, "duplicate pack"):
+        (self.root / "pack-order.txt").write_text("10|Existing\n")
+        with self.assertRaisesRegex(ValueError, "remove numbering"):
             build(self.root)
+
+    def test_missing_order_file_preserves_previous_index(self):
+        self.put("Existing")
+        build(self.root)
+        previous = (self.root / "chunks" / "index.txt").read_bytes()
+        (self.root / "pack-order.txt").unlink()
+        with self.assertRaisesRegex(ValueError, "pack-order.txt is required"):
+            build(self.root)
+        self.assertEqual((self.root / "chunks" / "index.txt").read_bytes(), previous)
+
+    def test_filename_extension_not_used_in_order(self):
+        self.put("Existing")
+        (self.root / "pack-order.txt").write_text("Existing.txt\n")
+        with self.assertRaisesRegex(ValueError, "without the .txt"):
+            build(self.root)
+
+    def test_24_pack_limit_counts_only_listed_populated_files(self):
+        for i in range(24):
+            self.put(f"Pack {i:02}")
+        build(self.root)
+        self.put("Pack 24")
+        before = (self.root / "chunks" / "index.txt").read_bytes()
+        with self.assertRaisesRegex(ValueError, "24-pack menu limit"):
+            build(self.root)
+        self.assertEqual(before, (self.root / "chunks" / "index.txt").read_bytes())
 
     def test_every_generated_chunk_has_a_verifiable_sha256_envelope(self):
         many = "\n".join(SCENE.replace("[One]", f"[Scene {i:02}]")
