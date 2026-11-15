@@ -1,23 +1,23 @@
-1|Defaults
-5|Abstract
-10|Patterns
-12|Patterns 2
-15|Psychedelic
-20|Brick & Stone
-25|Windows
-30|Clouds & Skies
-35|Indoors
-40|Outdoors
-50|Holidays
-60|Animations
-65|Scene Pack 1
-70|Scene Pack 2
-75Scene Pack 3
-80|Scene Pack 4
-81|Scene Pack 5
-82|Scene Pack 6
-83|Scene Pack 7
-84|Scene Pack 8 
-85|Scene Pack 9
-86|Scene Pack 10
-87|Scene Pack 11
+Defaults
+Abstract
+Patterns
+Patterns 2
+Psychedelic
+Brick & Stone
+Windows
+Clouds & Skies
+Indoors
+Outdoors
+Holidays
+Animations
+Scene Pack 1
+Scene Pack 2
+Scene Pack 3
+Scene Pack 4
+Scene Pack 5
+Scene Pack 6
+Scene Pack 7
+Scene Pack 8 
+Scene Pack 9
+Scene Pack 10
+Scene Pack 11
