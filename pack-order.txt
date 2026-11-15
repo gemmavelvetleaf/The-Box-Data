@@ -14,3 +14,4 @@
 80|Scene Pack 3
 90|Scene Pack 4
 95|Scene Pack 5
+96|Scene Pack 6
