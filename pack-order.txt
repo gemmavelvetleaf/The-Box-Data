@@ -14,5 +14,10 @@
 70|Scene Pack 2
 80|Scene Pack 3
 90|Scene Pack 4
-95|Scene Pack 5
-96|Scene Pack 6
+91|Scene Pack 5
+92|Scene Pack 6
+93|Scene Pack 7
+94|Scene Pack 8 
+95|Scene Pack 9
+96|Scene Pack 10
+97|Scene Pack 11
