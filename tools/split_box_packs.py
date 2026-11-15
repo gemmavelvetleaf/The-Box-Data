@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Build validated, automatically versioned Box chunks from packs/*.txt.
+"""Build validated Box chunks ONLY for packs listed in pack-order.txt.
 
-Human-maintained source files are never rewritten. Filename determines PACK;
-generated content determines VERSION. Legacy handwritten headers are ignored.
+Pack-order.txt is authoritative, with one unnumbered name per line. Human
+source files are never rewritten. Filename determines PACK; generated content
+determines VERSION. Legacy scene-file headers are ignored.
 """
 from __future__ import annotations
 
@@ -308,67 +309,59 @@ def split_line_aligned(text: str, path: Path) -> list[str]:
     return chunks
 
 
-def read_order(path: Path, names: set[str], placeholders: set[str] | None = None) -> dict[str, int]:
-    """Order existing packs; reserve future pack names without failing builds."""
-    if not path.exists():
-        return {}
-    result: dict[str, int] = {}
-    used_names: set[str] = set()
-    used_positions: set[int] = set()
+def read_order(path: Path) -> list[str]:
+    """Authoritative pack list: one exact pack name per line, in menu order.
+
+    Only listed packs are published. A malformed, missing or duplicated entry
+    is a build error rather than silently changing the customer's catalog.
+    """
+    if not path.is_file():
+        error(f"missing {path}; pack-order.txt is required (one pack name per line)")
+    names: list[str] = []
+    seen: set[str] = set()
     for lineno, raw in enumerate(path.read_text(encoding="utf-8-sig").splitlines(), 1):
-        line = raw.strip()
-        if not line or line.startswith("#"):
+        name = raw.strip()
+        if not name or name.startswith("#"):
             continue
-        pieces = line.split("|", 1)
-        if len(pieces) != 2 or not pieces[0].strip().isdigit():
-            error(f"{path}:{lineno}: expected NUMBER|Pack Name")
-        position, name = int(pieces[0]), pieces[1].strip()
-        if not name:
-            error(f"{path}:{lineno}: pack name cannot be blank")
-        # Treat duplicates as errors even when the pack is not created yet.
-        if name in used_names or position in used_positions:
-            error(f"{path}:{lineno}: duplicate pack name or position {name!r}")
-        used_names.add(name)
-        used_positions.add(position)
-        if name not in names:
-            if name not in (placeholders or set()):
-                print(f"PLANNED PACK — SKIPPED: {name}.txt not found in packs/ "
-                      f"(pack-order.txt line {lineno}); will be included when created")
-            continue
-        result[name] = position
-    return result
+        if "|" in name:
+            error(f"{path}:{lineno}: remove numbering; use only the pack name, one per line")
+        if name.lower().endswith(".txt"):
+            error(f"{path}:{lineno}: use {name[:-4]!r} without the .txt extension")
+        if name in (".", "..") or "/" in name or "\\" in name:
+            error(f"{path}:{lineno}: invalid pack name {name!r}")
+        if name.casefold() in seen:
+            error(f"{path}:{lineno}: duplicate pack name {name!r}")
+        seen.add(name.casefold())
+        names.append(name)
+    if not names:
+        error(f"{path}: empty pack list; refusing to publish an empty catalog")
+    return names
 
 
 def build(root: Path) -> None:
     packs, out = root / "packs", root / "chunks"
     if not packs.is_dir():
         error(f"missing {packs}")
-    source_files = sorted(packs.glob("*.txt"), key=lambda p: p.name.casefold())
-    if not source_files:
-        error("no source packs/*.txt found")
-    if len({p.stem.casefold() for p in source_files}) != len(source_files):
-        error("pack filenames collide ignoring case")
-
-    # A future pack's blank/comment-only .txt is a placeholder, not an error.
-    # Importantly, never skip an incomplete scene or other malformed content.
+    # The order list is BOTH the inclusion list and the menu order. Unlisted
+    # files are not read, validated, published, or counted toward MAX_PACKS.
+    ordered_names = read_order(root / "pack-order.txt")
+    files: list[Path] = []
     sources: dict[Path, str] = {}
-    placeholders: set[str] = set()
-    for path in source_files:
+    for name in ordered_names:
+        path = packs / (name + ".txt")
+        if not path.is_file():
+            error(f"{root / 'pack-order.txt'}: {name!r} is listed but "
+                  f"packs/{name}.txt does not exist; correct the name or remove it")
         source = path.read_text(encoding="utf-8")
         if is_unpopulated_placeholder(source):
-            placeholders.add(path.stem)
-            print(f"PLANNED PACK — SKIPPED: {path.name} exists but has no scenes yet")
+            print(f"PLANNED PACK — SKIPPED: {path.name} is listed but has no scenes yet")
             continue
         sources[path] = source
-    files = list(sources)
+        files.append(path)
     if not files:
-        error("no populated scene packs found; refusing to replace the last good index with an empty library")
+        error("no populated scene packs are listed; refusing to replace the last good index with an empty library")
     if len(files) > MAX_PACKS:
-        error(f"{len(files)} populated packs exceeds the {MAX_PACKS}-pack menu limit")
-
-    order = read_order(root / "pack-order.txt", {p.stem for p in files}, placeholders)
-    files.sort(key=lambda p: (0, order[p.stem]) if p.stem in order
-               else (1, p.name.casefold()))
+        error(f"{len(files)} listed, populated packs exceeds the {MAX_PACKS}-pack menu limit")
 
     # Validate all populated packs before touching the last good generated output.
     records: list[tuple[str, str, list[str], int]] = []
