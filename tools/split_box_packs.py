@@ -24,7 +24,7 @@ MAX_SCENES = 54
 # Button prefix is up to "54:" (3 characters) out of 24.
 MAX_MENU_ALIAS = 21
 MAX_SCENE_LINES = 24  # 6 core + 6 outside/mirror + 6 inside G + 6 outside G
-MAX_PACKS = 24
+MAX_PACKS = 32
 CORE = {"F": 0, "FLOOR": 0, "C": 1, "CEILING": 1,
         "W1": 2, "WALL1": 2, "W2": 3, "WALL2": 3,
         "W3": 4, "WALL3": 4, "W4": 5, "WALL4": 5}
