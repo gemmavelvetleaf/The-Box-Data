@@ -298,15 +298,32 @@ class ChunkGeneratorTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "without the .txt"):
             build(self.root)
 
-    def test_24_pack_limit_counts_only_listed_populated_files(self):
-        for i in range(24):
+    def test_28_packs_obey_authoritative_unnumbered_order(self):
+        for i in range(28):
+            self.put(f"Pack {i:02}")
+        # Keep extra files in packs/, but do not publish them.
+        self.put("Old Draft", "[Broken]\nF=bad\n", listed=False)
+        reverse = [f"Pack {i:02}" for i in reversed(range(28))]
+        (self.root / "pack-order.txt").write_text("\n".join(reverse) + "\n")
+        build(self.root)
+        rows = (self.root / "chunks" / "index.txt").read_text().splitlines()
+        self.assertEqual([row.split("|")[0] for row in rows[1:]], reverse)
+        self.assertFalse((self.root / "chunks" / "Old Draft").exists())
+
+    def test_32_pack_limit_counts_only_listed_populated_files(self):
+        for i in range(32):
             self.put(f"Pack {i:02}")
         build(self.root)
-        self.put("Pack 24")
-        before = (self.root / "chunks" / "index.txt").read_bytes()
-        with self.assertRaisesRegex(ValueError, "24-pack menu limit"):
+        index = self.root / "chunks" / "index.txt"
+        self.assertEqual(len(index.read_text().splitlines()) - 1, 32)
+        self.put("Unused 33", listed=False)
+        build(self.root)
+        self.assertEqual(len(index.read_text().splitlines()) - 1, 32)
+        before = index.read_bytes()
+        self.put("Pack 32")
+        with self.assertRaisesRegex(ValueError, "32-pack menu limit"):
             build(self.root)
-        self.assertEqual(before, (self.root / "chunks" / "index.txt").read_bytes())
+        self.assertEqual(before, index.read_bytes())
 
     def test_every_generated_chunk_has_a_verifiable_sha256_envelope(self):
         many = "\n".join(SCENE.replace("[One]", f"[Scene {i:02}]")
