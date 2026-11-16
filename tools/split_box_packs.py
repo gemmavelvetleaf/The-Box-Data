@@ -1,438 +1,369 @@
-#!/usr/bin/env python3
-"""Build validated Box chunks ONLY for packs listed in pack-order.txt.
-
-Pack-order.txt is authoritative, with one unnumbered name per line. Human
-source files are never rewritten. Filename determines PACK; generated content
-determines VERSION. Legacy scene-file headers are ignored.
-"""
+"""Offline regression checks for The Box chunk generator."""
 from __future__ import annotations
 
-import argparse
-import hashlib
-import math
 import os
-import re
+import hashlib
+import subprocess
 import sys
 import tempfile
+import unittest
 from pathlib import Path
-from urllib.parse import quote, urlsplit
 
-MAX_CHUNK_BYTES = 3000
-# Leave room for CHUNK=index/count|sha256\n on each response.
-MAX_PAYLOAD_BYTES = MAX_CHUNK_BYTES - 90
-MAX_SCENES = 54
-# Button prefix is up to "54:" (3 characters) out of 24.
-MAX_MENU_ALIAS = 21
-MAX_SCENE_LINES = 24  # 6 core + 6 outside/mirror + 6 inside G + 6 outside G
-MAX_PACKS = 32
-CORE = {"F": 0, "FLOOR": 0, "C": 1, "CEILING": 1,
-        "W1": 2, "WALL1": 2, "W2": 3, "WALL2": 3,
-        "W3": 4, "WALL3": 4, "W4": 5, "WALL4": 5}
-UUID = re.compile(r"[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}\Z")
-NUMBER = re.compile(r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?\Z")
-MAX_TILE_REPEAT = 32
-URL_PANEL = {"UF": (0, False), "UC": (1, False),
-             "UOF": (0, True), "UOC": (1, True),
-             **{f"UW{i}": (i + 1, False) for i in range(1, 5)},
-             **{f"UO{i}": (i + 1, True) for i in range(1, 5)}}
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from split_box_packs import build, canonicalize_and_validate  # noqa: E402
 
 
-def error(message: str) -> None:
-    raise ValueError(message)
+UUID = "c7a4e9ff-3a9c-aef0-0481-5f14d6ac2fd4"
+PANEL = f"{UUID}|<1,1,0>|<0,0,0>|0|<1,1,1>|1|1"
+SCENE = "[One]\n" + "\n".join(f"{p}={PANEL}" for p in
+                                     ("F", "C", "W1", "W2", "W3", "W4")) + "\n"
+GIF = "https://github.com/gemmavelvetleaf/The-Box-Data/blob/main/GIF/People%20Machine.gif"
+STREAM = "http://85.215.155.9:86/hls/stream/?controls=false&muted=false&autoplay=true&playsinline=true"
 
 
-def check_number(value: str, location: str) -> float:
-    if not NUMBER.fullmatch(value.strip()):
-        error(f"{location}: invalid numeric value {value!r}")
-    number = float(value)
-    if not math.isfinite(number):
-        error(f"{location}: nonfinite numeric value {value!r}")
-    return number
+class ChunkGeneratorTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        (self.root / "packs").mkdir()
 
+    def put(self, name="Pasture", content=SCENE, *, listed=True):
+        path = self.root / "packs" / (name + ".txt")
+        path.write_text(content, encoding="utf-8")
+        order = self.root / "pack-order.txt"
+        if listed:
+            current = order.read_text(encoding="utf-8") if order.exists() else ""
+            if name not in current.splitlines():
+                order.write_text(current + name + "\n", encoding="utf-8")
+        return path
 
-def check_vector(value: str, location: str) -> None:
-    value = value.strip()
-    if not value.startswith("<") or not value.endswith(">"):
-        error(f"{location}: expected <x,y,z>")
-    pieces = value[1:-1].split(",")
-    if len(pieces) != 3:
-        error(f"{location}: vector requires three components")
-    for part in pieces:
-        check_number(part, location)
+    def test_old_headers_are_ignored_and_version_is_content_derived(self):
+        path = self.put(content="VERSION=forgotten\nPACK=Wrong Name\n\n" + SCENE)
+        first, data, count = canonicalize_and_validate(path, path.read_text())
+        self.assertEqual(count, 1)
+        self.assertIn("PACK=Pasture\n", data)
+        self.assertTrue(data.startswith("VERSION=" + first))
+        path.write_text("VERSION=another\nPACK=Also Wrong\n\n" + SCENE)
+        second, _, _ = canonicalize_and_validate(path, path.read_text())
+        self.assertEqual(first, second)
 
+    def test_scene_change_changes_version(self):
+        path = self.put()
+        first, _, _ = canonicalize_and_validate(path, path.read_text())
+        path.write_text(SCENE.replace("|1|1", "|0.9|1"))
+        second, _, _ = canonicalize_and_validate(path, path.read_text())
+        self.assertNotEqual(first, second)
 
-def check_spec(value: str, location: str) -> None:
-    parts = [p.strip() for p in value.split("|")]
-    if len(parts) != 7:
-        error(f"{location}: panel requires 7 pipe-separated fields; got {len(parts)}")
-    if not UUID.fullmatch(parts[0]) or parts[0].lower() == "00000000-0000-0000-0000-000000000000":
-        error(f"{location}: invalid texture UUID {parts[0]!r}")
-    check_vector(parts[1], location)
-    check_vector(parts[2], location)
-    check_number(parts[3], location)
-    check_vector(parts[4], location)
-    if not 0 <= check_number(parts[5], location) <= 1:
-        error(f"{location}: alpha must be between 0 and 1")
-    if parts[6] not in ("0", "1"):
-        error(f"{location}: fullbright must be 0 or 1")
+    def test_invalid_scene_preserves_last_generated_output(self):
+        path = self.put()
+        build(self.root)
+        old = (self.root / "chunks" / "index.txt").read_bytes()
+        path.write_text(SCENE.replace("W4=", "BROKEN="))
+        with self.assertRaisesRegex(ValueError, "unknown panel"):
+            build(self.root)
+        self.assertEqual(old, (self.root / "chunks" / "index.txt").read_bytes())
 
+    def test_cli_failure_has_visible_github_annotation_and_summary(self):
+        self.put(content=SCENE + "NOT_A_PANEL=" + PANEL + "\n")
+        summary = self.root / "step-summary.md"
+        env = dict(os.environ, GITHUB_STEP_SUMMARY=str(summary))
+        command = [sys.executable,
+                   str(Path(__file__).with_name("split_box_packs.py")),
+                   "--root", str(self.root)]
+        run = subprocess.run(command, text=True, capture_output=True, env=env,
+                             check=False)
+        self.assertNotEqual(run.returncode, 0)
+        self.assertIn("NO NEW SCENES WERE PUBLISHED", run.stderr)
+        self.assertIn("::error file=packs/Pasture.txt,line=", run.stderr)
+        self.assertIn("The Box scene pack update failed", summary.read_text())
 
-def check_graphics_url(value: str, location: str) -> None:
-    """Accept HTTP(S) media pages unchanged; only GIFs can specify tiling."""
-    if len(value.encode("utf-8")) > 1024 or not value or any(
-        ord(c) < 33 or c in '<>"\'' for c in value
-    ):
-        error(f"{location}: invalid graphics URL {value!r}")
+    def test_long_scene_name_preserves_canonical_and_unique_aliases(self):
+        one = "White Room Wide Window TR"
+        two = "White Room Wide Window Transparent"
+        path = self.put(content=SCENE.replace("[One]", f"[{one}]") + "\n"
+                        + SCENE.replace("[One]", f"[{two}]") + "\n")
+        _, generated, count = canonicalize_and_validate(path, path.read_text())
+        self.assertEqual(count, 2)
+        self.assertIn(f"[{one}]\nALIAS=", generated)
+        self.assertIn(f"[{two}]\nALIAS=", generated)
+        aliases = [line[6:] for line in generated.splitlines() if line.startswith("ALIAS=")]
+        self.assertEqual(len(aliases), 2)
+        self.assertNotEqual(aliases[0].casefold(), aliases[1].casefold())
+        self.assertTrue(all(len(alias) <= 21 for alias in aliases))
 
-    raw_url = value
-    across, down = 1, 1
-    if "|" in value:
-        pieces = value.split("|")
-        if len(pieces) != 3 or any(
-            not p.isascii() or not p.isdecimal() or not 1 <= int(p) <= MAX_TILE_REPEAT
-            for p in pieces[1:]
-        ):
-            error(f"{location}: invalid GIF tiling; expected URL|across|down (1-32)")
-        raw_url = pieces[0]
-        across, down = int(pieces[1]), int(pieces[2])
-        if not urlsplit(raw_url).path.lower().endswith(".gif"):
-            error(f"{location}: tiling is only supported for GIF images")
+    def test_short_names_stay_unchanged(self):
+        path = self.put()
+        _, generated, _ = canonicalize_and_validate(path, path.read_text())
+        self.assertNotIn("ALIAS=", generated)
 
-    try:
-        parsed = urlsplit(raw_url)
-        if parsed.scheme not in ("http", "https") or not parsed.hostname:
-            error(f"{location}: graphics URL must be an HTTP(S) address with a hostname")
-        # Force malformed ports to fail validation as well.
-        _ = parsed.port
-    except ValueError as exc:
-        error(f"{location}: invalid graphics URL {value!r}: {exc}")
+    def test_duplicate_name_rejected(self):
+        path = self.put(content=SCENE + "\n" + SCENE)
+        with self.assertRaisesRegex(ValueError, "duplicate scene name"):
+            canonicalize_and_validate(path, path.read_text())
 
-    if parsed.path.lower().endswith(".gif"):
-        gif = raw_url
-        if gif.startswith("https://github.com/") and "/blob/" in gif:
-            gif = "https://raw.githubusercontent.com/" + gif[19:].replace("/blob/", "/", 1)
-        style = (f"background-image:url('{gif}');background-repeat:repeat;"
-                 f"background-size:{100.0 / across:.6f}% {100.0 / down:.6f}%")
-        html = ("<html><head><meta name='viewport' content='width=device-width,initial-scale=1'>"
-                "</head><body style=\"margin:0;background-color:black;" + style
-                + ";height:100vh;width:100vw;overflow:hidden\"></body></html>")
-        if len(("data:text/html," + quote(html, safe="")).encode("utf-8")) > 1024:
-            error(f"{location}: GIF media page exceeds Second Life's 1024-byte URL limit; use a shorter GIF URL")
+    def test_invalid_uuid_rejected(self):
+        path = self.put(content=SCENE.replace(UUID, "no-texture"))
+        with self.assertRaisesRegex(ValueError, "invalid texture UUID"):
+            canonicalize_and_validate(path, path.read_text())
 
+    def test_graphics_and_outside_tags_can_share_panel(self):
+        source = SCENE + "O1=" + PANEL + "\nUW1=" + GIF + "\nUO1=" + STREAM + "\n"
+        path = self.put(content=source)
+        _, generated, count = canonicalize_and_validate(path, path.read_text())
+        self.assertEqual(count, 1)
+        self.assertIn("UW1=" + GIF, generated)
+        self.assertIn("UO1=" + STREAM, generated)
 
-def make_scene_aliases(source: str, path: Path) -> dict[str, str]:
-    """Unique, stable menu labels; keep full canonical names in scene headings."""
-    headers: list[tuple[str, int]] = []
-    seen_full: set[str] = set()
-    for lineno, raw in enumerate(source.split("\n"), 1):
-        line = raw.strip()
-        if line.startswith("[") and line.endswith("]"):
-            name = line[1:-1].strip()
-            if not name:
-                error(f"{path}:{lineno}: blank scene name")
-            if name.casefold() in seen_full:
-                error(f"{path}:{lineno}: duplicate scene name: {name}")
-            seen_full.add(name.casefold())
-            headers.append((name, lineno))
-    # Reserve all existing short labels first so hashed long labels can never
-    # displace an unchanged short scene name.
-    used = {name.casefold() for name, _ in headers if len(name) <= MAX_MENU_ALIAS}
-    aliases: dict[str, str] = {}
-    for name, lineno in headers:
-        if len(name) <= MAX_MENU_ALIAS:
-            aliases[name] = name
-            continue
-        digest = hashlib.sha256(name.encode("utf-8")).hexdigest()
-        for digits in range(5, len(digest) + 1):
-            head = MAX_MENU_ALIAS - digits - 1
-            if head < 0:
-                break
-            alias = name[:head] + "~" + digest[:digits]
-            if alias.casefold() not in used:
-                aliases[name] = alias
-                used.add(alias.casefold())
-                break
-        if name not in aliases:
-            error(f"{path}:{lineno}: cannot assign unique menu label: {name}")
-    return aliases
+    def test_non_github_gif_is_accepted(self):
+        path = self.put(content=SCENE + "UW1=https://example.com/photo.gif\n")
+        canonicalize_and_validate(path, path.read_text())
 
+    def test_bad_graphics_scheme_is_rejected(self):
+        path = self.put(content=SCENE + "UW1=javascript:alert(1)\n")
+        with self.assertRaisesRegex(ValueError, r"HTTP\(S\)"):
+            canonicalize_and_validate(path, path.read_text())
 
-def canonicalize_and_validate(path: Path, source: str) -> tuple[str, str, int]:
-    name = path.stem
-    if not name or name != name.strip() or "|" in name:
-        error(f"{path}: invalid pack filename")
-    source = source.lstrip("\ufeff").replace("\r\n", "\n").replace("\r", "\n")
-    aliases = make_scene_aliases(source, path)
-    body: list[str] = []
-    scene_name = ""
-    scene_started = False
-    scenes = 0
-    core_seen: set[int] = set()
-    optional_seen: set[int] = set()
-    gif_seen: set[int] = set()
-    outside_g_seen: set[int] = set()
-    scene_lines = 0
+    def test_duplicate_graphics_panel_is_rejected(self):
+        path = self.put(content=SCENE + "UW1=" + GIF + "\nUW1=" + GIF + "\n")
+        with self.assertRaisesRegex(ValueError, "duplicate graphics panel"):
+            canonicalize_and_validate(path, path.read_text())
 
-    def finish_scene(at_line: int) -> None:
-        if not scene_name:
-            return
-        if len(core_seen) != 6:
-            missing = [tag for tag, i in (("F", 0), ("C", 1), ("W1", 2),
-                                          ("W2", 3), ("W3", 4), ("W4", 5))
-                       if i not in core_seen]
-            error(f"{path}:{at_line}: [{scene_name}] missing {', '.join(missing)}")
+    def test_all_six_short_gif_tags_are_valid(self):
+        tags = ("UF", "UC", "UW1", "UW2", "UW3", "UW4")
+        path = self.put(content=SCENE + "".join(f"{tag}={GIF}\n" for tag in tags))
+        _, generated, count = canonicalize_and_validate(path, path.read_text())
+        self.assertEqual(count, 1)
+        for tag in tags:
+            self.assertIn(f"{tag}={GIF}", generated)
 
-    for lineno, raw in enumerate(source.split("\n"), 1):
-        line = raw.strip()
-        place = f"{path}:{lineno}" + (f" [{scene_name}]" if scene_name else "")
-        # Existing metadata may be incorrect; it is no longer authoritative.
-        if scenes == 0 and line.upper().startswith(("VERSION=", "PACK=")):
-            continue
-        if line.startswith("[") and line.endswith("]"):
-            finish_scene(lineno)
-            scene_name = line[1:-1].strip()
-            if not scene_name:
-                error(f"{place}: blank scene name")
-            scenes += 1
-            if scenes > MAX_SCENES:
-                error(f"{place}: exceeded {MAX_SCENES} scenes per pack")
-            scene_started = True
-            scene_lines = 0
-            core_seen = set()
-            optional_seen = set()
-            gif_seen = set()
-            outside_g_seen = set()
-            body.append(line)
-            alias = aliases[scene_name]
-            if alias != scene_name:
-                # The LSL loader consumes ALIAS= as metadata, not a scene panel.
-                # The original [canonical name] remains available in-world.
-                body.append("ALIAS=" + alias)
-                print(f"MENU LABEL: {path.name}: {scene_name!r} -> {alias!r}")
-            continue
-        if not scene_started:
-            if line and not line.startswith(("#", "//")):
-                error(f"{place}: expected [Scene Name] or a comment")
-            body.append(raw)
-            continue
-        if not line:
-            finish_scene(lineno)
-            scene_started = False
-            scene_name = ""
-            body.append(raw)
-            continue
-        if "=" not in line:
-            error(f"{place}: expected PANEL=values")
-        tag, spec = (part.strip() for part in line.split("=", 1))
-        tag = tag.upper()
-        if tag in CORE:
-            panel = CORE[tag]
-            if panel in core_seen:
-                error(f"{place}: duplicate panel {tag}")
-            core_seen.add(panel)
-            check_spec(spec, place)
-        else:
-            panel = -1
-            if tag.startswith("U"):
-                panel, outside_g = URL_PANEL.get(tag, (-1, False))
-                if panel < 0:
-                    error(f"{place}: unknown graphics panel {tag!r}")
-                check_graphics_url(spec, place)
-                target = outside_g_seen if outside_g else gif_seen
-                if panel in target:
-                    error(f"{place}: duplicate graphics panel {tag}")
-                target.add(panel)
-            elif tag.endswith("_MIRROR"):
-                panel = CORE.get(tag[:-7], -1)
-                if spec.upper() != "ON":
-                    error(f"{place}: mirror setting must be ON")
-            elif tag.startswith("O"):
-                suffix = tag[1:]
-                if suffix in ("1", "2", "3", "4"):
-                    suffix = "W" + suffix
-                panel = CORE.get(suffix, -1)
-                if panel >= 0:
-                    check_spec(spec, place)
-            if panel < 0:
-                error(f"{place}: unknown panel {tag!r}")
-            if not tag.startswith("U"):
-                if panel in optional_seen:
-                    error(f"{place}: duplicate outside/mirror panel {tag}")
-                optional_seen.add(panel)
-        scene_lines += 1
-        if scene_lines > MAX_SCENE_LINES:
-            error(f"{place}: exceeded {MAX_SCENE_LINES} lines per scene")
-        body.append(raw)
-    finish_scene(len(source.split("\n")))
-    if scenes == 0:
-        error(f"{path}: no scenes")
+    def test_old_long_gif_tag_is_rejected(self):
+        path = self.put(content=SCENE + "GW1=" + GIF + "\n")
+        with self.assertRaisesRegex(ValueError, "unknown panel"):
+            canonicalize_and_validate(path, path.read_text())
 
-    payload = "\n".join(body).strip("\n") + "\n"
-    version = "h" + hashlib.sha256((name + "\n" + payload).encode("utf-8")).hexdigest()[:12]
-    return version, f"VERSION={version}\nPACK={name}\n\n" + payload, scenes
+    def test_bare_live_stream_url_with_player_options(self):
+        path = self.put(content=SCENE + "UW1=" + STREAM + "\n")
+        _, generated, _ = canonicalize_and_validate(path, path.read_text())
+        self.assertIn("UW1=" + STREAM, generated)
 
+    def test_tiled_gif_and_query_string(self):
+        path = self.put(content=SCENE + "UW1=" + GIF + "|4|4\n"
+                        + "UO2=https://example.net/tiles/animated.gif?cache=7|2|3\n")
+        _, generated, _ = canonicalize_and_validate(path, path.read_text())
+        self.assertIn("UW1=" + GIF + "|4|4", generated)
 
+    def test_tiling_must_be_positive_bounded_and_gif(self):
+        for suffix in ("|0|4", "|33|4", "|4|no", "|4", "|4|4|4"):
+            with self.subTest(suffix=suffix):
+                path = self.put(content=SCENE + "UW1=" + GIF + suffix + "\n")
+                with self.assertRaisesRegex(ValueError, "tiling"):
+                    canonicalize_and_validate(path, path.read_text())
+        path = self.put(content=SCENE + "UW1=" + STREAM + "|2|2\n")
+        with self.assertRaisesRegex(ValueError, "only supported for GIF"):
+            canonicalize_and_validate(path, path.read_text())
 
-def is_unpopulated_placeholder(source: str) -> bool:
-    """Allow a reserved pack file with no scene data yet.
+    def test_long_gif_address_rejected_before_publishing(self):
+        long_gif = "https://example.com/" + "a" * 780 + ".gif"
+        path = self.put(content=SCENE + "UW1=" + long_gif + "\n")
+        with self.assertRaisesRegex(ValueError, "1024-byte URL limit"):
+            canonicalize_and_validate(path, path.read_text())
 
-    Only blank lines, comments, and optional legacy VERSION=/PACK= headers
-    qualify. Any other content (including an incomplete [Scene] or stray
-    F= line) must still go through normal validation and fail if malformed.
-    """
-    source = source.lstrip("\ufeff").replace("\r\n", "\n").replace("\r", "\n")
-    for raw in source.splitlines():
-        line = raw.strip()
-        if not line or line.startswith(("#", "//")):
-            continue
-        if line.upper().startswith(("VERSION=", "PACK=")):
-            continue
-        return False
-    return True
+    def test_short_and_legacy_outside_tags_are_equivalent(self):
+        for outside in ("O1", "OW1"):
+            with self.subTest(outside=outside):
+                path = self.put(content=SCENE + outside + "=" + PANEL + "\n")
+                canonicalize_and_validate(path, path.read_text())
+        path = self.put(content=SCENE + "O1=" + PANEL + "\nOW1=" + PANEL + "\n")
+        with self.assertRaisesRegex(ValueError, "duplicate outside"):
+            canonicalize_and_validate(path, path.read_text())
 
+    def test_twenty_four_scene_records_are_allowed(self):
+        inside = ("UF", "UC", "UW1", "UW2", "UW3", "UW4")
+        outside = ("UOF", "UOC", "UO1", "UO2", "UO3", "UO4")
+        exterior = ("OF", "OC", "O1", "O2", "O3", "O4")
+        content = SCENE + "".join(t + "=" + PANEL + "\n" for t in exterior)
+        content += "".join(t + "=" + GIF + "\n" for t in inside + outside)
+        path = self.put(content=content)
+        _, generated, _ = canonicalize_and_validate(path, path.read_text())
+        self.assertIn("UO4=" + GIF, generated)
 
-def split_line_aligned(text: str, path: Path) -> list[str]:
-    chunks: list[str] = []
-    current: list[str] = []
-    size = 0
-    for line in text.splitlines(keepends=True):
-        n = len(line.encode("utf-8"))
-        if n > MAX_PAYLOAD_BYTES:
-            error(f"{path}: one generated line exceeds {MAX_PAYLOAD_BYTES} bytes")
-        if current and size + n > MAX_PAYLOAD_BYTES:
-            chunks.append("".join(current))
-            current, size = [], 0
-        current.append(line)
-        size += n
-    if current:
-        chunks.append("".join(current))
-    return chunks
+    def test_order_list_controls_both_inclusion_and_order(self):
+        self.put("A")
+        self.put("B")
+        self.put("C", listed=False)
+        (self.root / "pack-order.txt").write_text("B\nA\n", encoding="utf-8")
+        build(self.root)
+        rows = (self.root / "chunks" / "index.txt").read_text().splitlines()
+        self.assertEqual([row.split("|")[0] for row in rows[1:]], ["B", "A"])
+        self.assertFalse((self.root / "chunks" / "C").exists())
+        (self.root / "pack-order.txt").write_text("A\n", encoding="utf-8")
+        build(self.root)
+        self.assertFalse((self.root / "chunks" / "B").exists())
+        self.assertEqual(len((self.root / "chunks" / "index.txt").read_text().splitlines()), 2)
 
+    def test_unlisted_invalid_packs_do_not_block_build(self):
+        self.put("Existing")
+        self.put("Broken", "[Broken]\nF=bad\n", listed=False)
+        build(self.root)
+        self.assertNotIn("Broken|", (self.root / "chunks" / "index.txt").read_text())
 
-def read_order(path: Path) -> list[str]:
-    """Authoritative pack list: one exact pack name per line, in menu order.
+    def test_unlisted_files_do_not_count_toward_pack_limit(self):
+        self.put("Existing")
+        for i in range(30):
+            self.put(f"Unused {i:02}", listed=False)
+        build(self.root)
+        self.assertEqual(len((self.root / "chunks" / "index.txt").read_text().splitlines()), 2)
 
-    Only listed packs are published. A malformed, missing or duplicated entry
-    is a build error rather than silently changing the customer's catalog.
-    """
-    if not path.is_file():
-        error(f"missing {path}; pack-order.txt is required (one pack name per line)")
-    names: list[str] = []
-    seen: set[str] = set()
-    for lineno, raw in enumerate(path.read_text(encoding="utf-8-sig").splitlines(), 1):
-        name = raw.strip()
-        if not name or name.startswith("#"):
-            continue
-        if "|" in name:
-            error(f"{path}:{lineno}: remove numbering; use only the pack name, one per line")
-        if name.lower().endswith(".txt"):
-            error(f"{path}:{lineno}: use {name[:-4]!r} without the .txt extension")
-        if name in (".", "..") or "/" in name or "\\" in name:
-            error(f"{path}:{lineno}: invalid pack name {name!r}")
-        if name.casefold() in seen:
-            error(f"{path}:{lineno}: duplicate pack name {name!r}")
-        seen.add(name.casefold())
-        names.append(name)
-    if not names:
-        error(f"{path}: empty pack list; refusing to publish an empty catalog")
-    return names
+    def test_future_pack_listed_without_file_is_error(self):
+        self.put("Existing")
+        (self.root / "pack-order.txt").write_text("Existing\nFuture Pack\n")
+        with self.assertRaisesRegex(ValueError, "does not exist"):
+            build(self.root)
+        self.put("Future Pack", listed=False)
+        build(self.root)
+        rows = (self.root / "chunks" / "index.txt").read_text().splitlines()
+        self.assertEqual([row.split("|")[0] for row in rows[1:]],
+                         ["Existing", "Future Pack"])
 
+    def test_empty_patterns_placeholder_is_skipped_without_error(self):
+        self.put("Existing")
+        self.put("Patterns", "")
+        build(self.root)
+        index = (self.root / "chunks" / "index.txt").read_text()
+        self.assertIn("Existing|", index)
+        self.assertNotIn("Patterns|", index)
+        self.assertFalse((self.root / "chunks" / "Patterns").exists())
+        self.put("Patterns", SCENE)
+        build(self.root)
+        rows = (self.root / "chunks" / "index.txt").read_text().splitlines()
+        self.assertEqual([row.split("|")[0] for row in rows[1:]],
+                         ["Existing", "Patterns"])
 
-def build(root: Path) -> None:
-    packs, out = root / "packs", root / "chunks"
-    if not packs.is_dir():
-        error(f"missing {packs}")
-    # The order list is BOTH the inclusion list and the menu order. Unlisted
-    # files are not read, validated, published, or counted toward MAX_PACKS.
-    ordered_names = read_order(root / "pack-order.txt")
-    files: list[Path] = []
-    sources: dict[Path, str] = {}
-    for name in ordered_names:
-        path = packs / (name + ".txt")
-        if not path.is_file():
-            error(f"{root / 'pack-order.txt'}: {name!r} is listed but "
-                  f"packs/{name}.txt does not exist; correct the name or remove it")
-        source = path.read_text(encoding="utf-8")
-        if is_unpopulated_placeholder(source):
-            print(f"PLANNED PACK — SKIPPED: {path.name} is listed but has no scenes yet")
-            continue
-        sources[path] = source
-        files.append(path)
-    if not files:
-        error("no populated scene packs are listed; refusing to replace the last good index with an empty library")
-    if len(files) > MAX_PACKS:
-        error(f"{len(files)} listed, populated packs exceeds the {MAX_PACKS}-pack menu limit")
+    def test_comment_only_and_legacy_headers_are_placeholders(self):
+        self.put("Existing")
+        self.put("Patterns", "# Future collection\n// Not ready\nVERSION=draft\nPACK=Patterns\n")
+        build(self.root)
+        self.assertNotIn("Patterns|", (self.root / "chunks" / "index.txt").read_text())
 
-    # Validate all populated packs before touching the last good generated output.
-    records: list[tuple[str, str, list[str], int]] = []
-    for path in files:
-        version, text, scenes = canonicalize_and_validate(path, sources[path])
-        records.append((path.stem, version, split_line_aligned(text, path), scenes))
+    def test_incomplete_scene_is_not_ignored_as_placeholder(self):
+        self.put("Existing")
+        bad = self.put("Patterns", "[Unfinished]\nF=" + PANEL + "\n")
+        with self.assertRaisesRegex(ValueError, "missing"):
+            build(self.root)
+        bad.write_text("F=" + PANEL + "\n")
+        with self.assertRaisesRegex(ValueError, r"expected \[Scene Name\]"):
+            build(self.root)
 
-    with tempfile.TemporaryDirectory(prefix="box-build-", dir=root) as directory:
-        stage = Path(directory) / "new"
-        stage.mkdir()
-        index = ["# AUTO-GENERATED - DO NOT EDIT\n"]
-        for name, version, chunks, scenes in records:
-            target = stage / name
-            target.mkdir()
-            for i, text in enumerate(chunks):
-                checksum = hashlib.sha256(text.encode("utf-8")).hexdigest()
-                envelope = f"CHUNK={i + 1}/{len(chunks)}|{checksum}\n{text}"
-                if len(envelope.encode("utf-8")) > MAX_CHUNK_BYTES:
-                    error(f"{name}: generated chunk {i} exceeds HTTP capacity")
-                (target / f"{i:03d}.txt").write_text(envelope, encoding="utf-8", newline="")
-            index.append(f"{name}|{version}|{len(chunks)}\n")
-            print(f"{name}: {scenes} scenes, version {version}, {len(chunks)} chunks")
-        (stage / "index.txt").write_text("".join(index), encoding="utf-8", newline="")
-        backup = Path(directory) / "previous"
-        if out.exists():
-            os.replace(out, backup)
-        try:
-            os.replace(stage, out)
-        except OSError:
-            if backup.exists():
-                os.replace(backup, out)
-            raise
-    print("All packs validated; generated chunks updated.")
+    def test_empty_placeholder_does_not_hide_duplicate_order(self):
+        self.put("Existing")
+        self.put("Patterns", "")
+        (self.root / "pack-order.txt").write_text("Existing\nPatterns\nPatterns\n")
+        with self.assertRaisesRegex(ValueError, "duplicate pack"):
+            build(self.root)
 
+    def test_only_placeholders_preserves_existing_index(self):
+        good = self.put("Patterns", SCENE)
+        build(self.root)
+        previous = (self.root / "chunks" / "index.txt").read_bytes()
+        good.write_text("")
+        with self.assertRaisesRegex(ValueError, "no populated scene packs"):
+            build(self.root)
+        self.assertEqual((self.root / "chunks" / "index.txt").read_bytes(), previous)
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--root", type=Path,
-                        default=Path(__file__).resolve().parents[1])
-    args = parser.parse_args()
-    try:
-        build(args.root.resolve())
-    except (ValueError, OSError, UnicodeError) as exc:
-        reason = str(exc)
-        print("\n" + "=" * 72, file=sys.stderr)
-        print("THE BOX SCENE PACK BUILD FAILED — NO NEW SCENES WERE PUBLISHED", file=sys.stderr)
-        print("Fix this error and commit again:", file=sys.stderr)
-        print(reason, file=sys.stderr)
-        print("Previous generated scene data is preserved.\n" + "=" * 72,
-              file=sys.stderr)
-        match = re.match(r"(.+?\.txt):(\d+)(?: \[.*?\])?: (.+)", reason)
-        annotation = reason
-        if match:
-            path, line, detail = match.groups()
-            try:
-                path = str(Path(path).relative_to(args.root.resolve()))
-            except ValueError:
-                pass
-            annotation = f"file={path},line={line}::" + detail
-            print("::error " + annotation, file=sys.stderr)
-        else:
-            print("::error::" + annotation, file=sys.stderr)
-        summary = os.getenv("GITHUB_STEP_SUMMARY")
-        if summary:
-            with Path(summary).open("a", encoding="utf-8") as report:
-                report.write("## ❌ The Box scene pack update failed\n\n")
-                report.write("The new scene data was **not published**. ")
-                report.write("The previous generated version is still available.\n\n")
-                report.write("**Fix:** `" + reason.replace("`", "'") + "`\n")
-        raise SystemExit(1) from exc
+    def test_duplicate_planned_pack_name_is_rejected(self):
+        self.put("Existing")
+        (self.root / "pack-order.txt").write_text("Existing\nFuture Pack\nFuture Pack\n")
+        with self.assertRaisesRegex(ValueError, "duplicate pack"):
+            build(self.root)
+
+    def test_numbered_format_is_rejected_not_interpreted(self):
+        self.put("Existing")
+        (self.root / "pack-order.txt").write_text("10|Existing\n")
+        with self.assertRaisesRegex(ValueError, "remove numbering"):
+            build(self.root)
+
+    def test_missing_order_file_preserves_previous_index(self):
+        self.put("Existing")
+        build(self.root)
+        previous = (self.root / "chunks" / "index.txt").read_bytes()
+        (self.root / "pack-order.txt").unlink()
+        with self.assertRaisesRegex(ValueError, "pack-order.txt is required"):
+            build(self.root)
+        self.assertEqual((self.root / "chunks" / "index.txt").read_bytes(), previous)
+
+    def test_filename_extension_not_used_in_order(self):
+        self.put("Existing")
+        (self.root / "pack-order.txt").write_text("Existing.txt\n")
+        with self.assertRaisesRegex(ValueError, "without the .txt"):
+            build(self.root)
+
+    def test_28_packs_obey_authoritative_unnumbered_order(self):
+        for i in range(28):
+            self.put(f"Pack {i:02}")
+        # Keep extra files in packs/, but do not publish them.
+        self.put("Old Draft", "[Broken]\nF=bad\n", listed=False)
+        reverse = [f"Pack {i:02}" for i in reversed(range(28))]
+        (self.root / "pack-order.txt").write_text("\n".join(reverse) + "\n")
+        build(self.root)
+        rows = (self.root / "chunks" / "index.txt").read_text().splitlines()
+        self.assertEqual([row.split("|")[0] for row in rows[1:]], reverse)
+        self.assertFalse((self.root / "chunks" / "Old Draft").exists())
+
+    def test_32_pack_limit_counts_only_listed_populated_files(self):
+        for i in range(32):
+            self.put(f"Pack {i:02}")
+        build(self.root)
+        index = self.root / "chunks" / "index.txt"
+        self.assertEqual(len(index.read_text().splitlines()) - 1, 32)
+        self.put("Unused 33", listed=False)
+        build(self.root)
+        self.assertEqual(len(index.read_text().splitlines()) - 1, 32)
+        before = index.read_bytes()
+        self.put("Pack 32")
+        with self.assertRaisesRegex(ValueError, "32-pack menu limit"):
+            build(self.root)
+        self.assertEqual(before, index.read_bytes())
+
+    def test_every_generated_chunk_has_a_verifiable_sha256_envelope(self):
+        many = "\n".join(SCENE.replace("[One]", f"[Scene {i:02}]")
+                         for i in range(1, 30))
+        self.put(content=many)
+        build(self.root)
+        index = (self.root / "chunks" / "index.txt").read_text().splitlines()
+        number = int(index[1].split("|")[2])
+        self.assertGreater(number, 1)
+        combined = ""
+        for i in range(number):
+            raw = (self.root / "chunks" / "Pasture" / f"{i:03d}.txt").read_bytes()
+            self.assertLessEqual(len(raw), 3000)
+            header, text = raw.split(b"\n", 1)
+            self.assertEqual(header.decode(),
+                             f"CHUNK={i + 1}/{number}|" + hashlib.sha256(text).hexdigest())
+            combined += text.decode("utf-8")
+        self.assertEqual(combined.count("[Scene"), 29)
+        self.assertTrue(combined.startswith("VERSION="))
+
+    def test_rustic_window_github_gif_is_accepted_by_python(self):
+        raw_gif = ("https://raw.githubusercontent.com/"
+                   "gemmavelvetleaf/The-Box-Data/main/GIF/mind.gif")
+        self.put(content=SCENE + "UW4=" + raw_gif + "\n")
+        build(self.root)
+        chunk = (self.root / "chunks" / "Pasture" / "000.txt").read_text()
+        self.assertIn("UW4=" + raw_gif, chunk)
+
+    def test_invalid_graphics_url_does_not_replace_published_chunks(self):
+        path = self.put(content=SCENE + "UW4=https://example.com/mind.gif\n")
+        build(self.root)
+        old = {p.relative_to(self.root / "chunks"): p.read_bytes()
+               for p in (self.root / "chunks").rglob("*.txt")}
+        path.write_text(SCENE + "UW4=not-a-url\n")
+        with self.assertRaisesRegex(ValueError, "HTTP"):
+            build(self.root)
+        new = {p.relative_to(self.root / "chunks"): p.read_bytes()
+               for p in (self.root / "chunks").rglob("*.txt")}
+        self.assertEqual(old, new)
 
 
 if __name__ == "__main__":
-    main()
+    unittest.main()
