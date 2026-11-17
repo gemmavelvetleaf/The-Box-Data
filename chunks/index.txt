@@ -6,7 +6,7 @@ Patterns 2|hcf48b7638761|6
 Psychedelic|hf71b75ececac|2
 Brick & Stone|h796c115e0775|6
 Windows|h119bcb394f9b|4
-Clouds & Skies|hea8360f1fdda|2
+Clouds & Skies|h6235f4e09c7c|6
 Indoors|he126e0a4b948|6
 Outdoors|hc781d737d849|4
 Holidays|h3b547f82f7bc|6
