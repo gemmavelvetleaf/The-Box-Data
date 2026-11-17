@@ -10,6 +10,7 @@ Clouds-Skies|h52c9a8bb527b|7
 Indoors|hffa9ee05f716|9
 Outdoors|hc781d737d849|4
 Holidays|hdfe622853c81|9
+Holidays 2|h4d1dee52344c|1
 Animations|h85bc8cb24d19|1
 Water-Rain|he31e3995bcfd|2
 Flowers-Foliage|h730740d6398b|9
