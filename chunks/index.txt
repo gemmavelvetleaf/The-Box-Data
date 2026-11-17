@@ -7,7 +7,7 @@ Psychedelic|hf71b75ececac|2
 Brick-Stone|h8d881bd7279c|6
 Windows|h119bcb394f9b|4
 Clouds-Skies|h52c9a8bb527b|7
-Indoors|he126e0a4b948|6
+Indoors|hffa9ee05f716|9
 Outdoors|hc781d737d849|4
 Holidays|h3b547f82f7bc|6
 Animations|h85bc8cb24d19|1
