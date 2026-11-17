@@ -4,7 +4,7 @@ Abstract|h44265eb4e933|1
 Patterns|hb73bfef6f507|8
 Patterns 2|hcf48b7638761|6
 Psychedelic|hf71b75ececac|2
-Brick & Stone|h4f08bf0258c9|4
+Brick & Stone|h796c115e0775|6
 Windows|h119bcb394f9b|4
 Clouds & Skies|hea8360f1fdda|2
 Indoors|he126e0a4b948|6
