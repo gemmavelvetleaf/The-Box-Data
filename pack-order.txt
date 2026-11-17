@@ -9,10 +9,12 @@ Clouds-Skies
 Indoors
 Outdoors
 Holidays
+Holidays 2
 Animations
 Water-Rain
 Flowers-Foliage
 Flowers-Foliage 2
+Food
 Scene Pack 1
 Scene Pack 2
 Scene Pack 3
