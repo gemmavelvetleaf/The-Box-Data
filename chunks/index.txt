@@ -4,13 +4,16 @@ Abstract|h44265eb4e933|1
 Patterns|hb73bfef6f507|8
 Patterns 2|hcf48b7638761|6
 Psychedelic|hf71b75ececac|2
-Brick & Stone|h796c115e0775|6
+Brick-Stone|h8d881bd7279c|6
 Windows|h119bcb394f9b|4
-Clouds & Skies|h6235f4e09c7c|6
+Clouds-Skies|h003ae6652cb3|6
 Indoors|he126e0a4b948|6
 Outdoors|hc781d737d849|4
 Holidays|h3b547f82f7bc|6
 Animations|h85bc8cb24d19|1
+Water-Rain|he31e3995bcfd|2
+Flowers-Foliage|h730740d6398b|9
+Flowers-Foliage 2|hbb6ffd668080|2
 Scene Pack 1|hb8c48efd74de|9
 Scene Pack 2|h94217331f87d|9
 Scene Pack 3|h31922efba05d|9
