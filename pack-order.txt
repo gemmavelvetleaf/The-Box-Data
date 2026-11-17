@@ -3,14 +3,14 @@ Abstract
 Patterns
 Patterns 2
 Psychedelic
-Brick & Stone
+Brick-Stone
 Windows
-Clouds & Skies
+Clouds-Skies
 Indoors
 Outdoors
 Holidays
 Animations
-Water & Rain
+Water-Rain
 Flowers-Foliage
 Flowers-Foliage 2
 Scene Pack 1
