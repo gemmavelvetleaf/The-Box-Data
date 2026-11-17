@@ -16,7 +16,7 @@ Flowers-Foliage|h730740d6398b|9
 Flowers-Foliage 2|hbb6ffd668080|2
 Scene Pack 1|ha1c4a5aba612|5
 Scene Pack 2|h0f2cdc3ef90d|4
-Scene Pack 3|h8d133180f19c|4
+Scene Pack 3|hff053f84da3c|6
 Scene Pack 4|hdc5bcd574011|5
 Scene Pack 5|h4099fa653a8f|6
 Scene Pack 6|h2b27daee3b67|5
