@@ -10,6 +10,7 @@ Clouds-Skies
 Indoors
 Outdoors
 Objects
+Textures
 Holidays
 Holidays 2
 Animations
