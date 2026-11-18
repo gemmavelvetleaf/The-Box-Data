@@ -8,6 +8,7 @@ Brick-Stone
 Windows
 Clouds-Skies
 Indoors
+Indoors 2
 Outdoors
 Objects
 Textures
@@ -18,6 +19,7 @@ Water-Rain
 Flowers-Foliage
 Flowers-Foliage 2
 Foods
+Frames
 Scene Pack 1
 Scene Pack 2
 Scene Pack 3
