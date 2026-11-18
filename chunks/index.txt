@@ -10,7 +10,7 @@ Windows|h119bcb394f9b|4
 Clouds-Skies|h52c9a8bb527b|7
 Indoors|hb04ba23f4fa7|9
 Indoors 2|hab05af4d0b40|1
-Outdoors|hbc95e0901ef5|6
+Outdoors|he66dc62ae802|8
 Objects|hb0dc45ee215e|1
 Textures|h4677d5001a85|1
 Holidays|hdfe622853c81|9
