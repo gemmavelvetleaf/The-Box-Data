@@ -2,12 +2,14 @@ Defaults
 Abstract
 Patterns
 Patterns 2
+Patterns 3
 Psychedelic
 Brick-Stone
 Windows
 Clouds-Skies
 Indoors
 Outdoors
+Objects
 Holidays
 Holidays 2
 Animations
