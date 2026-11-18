@@ -8,7 +8,7 @@ Psychedelic|hc0594d4b9713|2
 Brick-Stone|hf0f6265582cc|6
 Windows|h119bcb394f9b|4
 Clouds-Skies|h52c9a8bb527b|7
-Indoors|hb04ba23f4fa7|9
+Indoors|ha377e6a7b8e8|10
 Indoors 2|hab05af4d0b40|1
 Outdoors|he66dc62ae802|8
 Objects|hb0dc45ee215e|1
