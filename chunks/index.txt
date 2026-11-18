@@ -3,12 +3,14 @@ Defaults|hcc3fd4b7f797|1
 Abstract|h44265eb4e933|1
 Patterns|h65ba840d698b|9
 Patterns 2|ha2835abea8aa|6
+Patterns 3|ha66f3f5518ee|2
 Psychedelic|hc0594d4b9713|2
 Brick-Stone|h8d881bd7279c|6
 Windows|h119bcb394f9b|4
 Clouds-Skies|h52c9a8bb527b|7
 Indoors|hffa9ee05f716|9
 Outdoors|hc781d737d849|4
+Objects|hc1253f7c3c62|1
 Holidays|hdfe622853c81|9
 Holidays 2|h4d1dee52344c|1
 Animations|h85bc8cb24d19|1
