@@ -20,6 +20,7 @@ Water-Rain|hcb3199d87a8e|3
 Flowers-Foliage|h730740d6398b|9
 Flowers-Foliage 2|hf4157e3df2f9|3
 Foods|hb9465f2f56d7|3
+Frames|he3206a017a2a|1
 Scene Pack 1|h909b5b29d511|5
 Scene Pack 2|h0f2cdc3ef90d|4
 Scene Pack 3|hff053f84da3c|6
