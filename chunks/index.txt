@@ -1,18 +1,18 @@
 # AUTO-GENERATED - DO NOT EDIT
 Defaults|hcc3fd4b7f797|1
-Abstract|h3d945443464e|3
+Abstract|hc5a709ac97be|4
 Patterns|h65ba840d698b|9
 Patterns 2|haa79d27d1f00|9
-Patterns 3|h616469495169|5
+Patterns 3|h00769eca5771|5
 Psychedelic|hf71b75ececac|2
 Brick-Stone|hf0f6265582cc|6
 Windows|h119bcb394f9b|4
 Clouds-Skies|h52c9a8bb527b|7
 Indoors|ha377e6a7b8e8|10
-Indoors 2|hab05af4d0b40|1
-Outdoors|he66dc62ae802|8
+Indoors 2|h1ebee300bc2e|2
+Outdoors|h43053021ee11|7
 Objects|h034cfc650028|2
-Textures|hc012a7f8b0ca|2
+Textures|haf3be498f848|2
 Holidays|hdfe622853c81|9
 Holidays 2|h4d1dee52344c|1
 Animations|h85bc8cb24d19|1
@@ -23,4 +23,3 @@ Foods|hb9465f2f56d7|3
 Frames|he3206a017a2a|1
 Scene Pack 1|h909b5b29d511|5
 Scene Pack 2|h0f2cdc3ef90d|4
-Scene Pack 3|h8d133180f19c|4
