@@ -3,7 +3,7 @@ Defaults|hcc3fd4b7f797|1
 Abstract|h696f14ea5c64|5
 Patterns|h65ba840d698b|9
 Patterns 2|haa79d27d1f00|9
-Patterns 3|h81ceeeac1837|6
+Patterns 3|h4aa36234ec86|6
 Psychedelic|hf71b75ececac|2
 Brick-Stone|hf0f6265582cc|6
 Windows|h119bcb394f9b|4
