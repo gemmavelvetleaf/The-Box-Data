@@ -12,7 +12,7 @@ Clouds-Skies|h52c9a8bb527b|7
 Indoors|ha377e6a7b8e8|10
 Indoors 2|h7f5f0fbb055b|6
 Outdoors|habcd234c7599|8
-Objects|h2c9a3af3baf1|2
+Objects|h7429a1a6c87a|3
 Textures|haf3be498f848|2
 Seasonal|he3e9ffab7399|9
 Seasonal 2|he277c04ab3c8|1
