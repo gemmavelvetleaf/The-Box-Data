@@ -4,6 +4,7 @@ Abstract|h601c10aef17c|5
 Patterns|h65ba840d698b|9
 Patterns 2|haa79d27d1f00|9
 Patterns 3|h4aa36234ec86|6
+Patterns 4|h47674f8201d1|6
 Psychedelic|hf71b75ececac|2
 Brick-Stone|hf0f6265582cc|6
 Windows|h119bcb394f9b|4
@@ -21,4 +22,3 @@ Flowers-Foliage|h730740d6398b|9
 Flowers-Foliage 2|hf4157e3df2f9|3
 Foods|h2600eb9191ab|4
 Frames|h896f77601e8e|1
-Incoming|hdbc1269702b0|9
