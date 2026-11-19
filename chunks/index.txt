@@ -13,8 +13,8 @@ Indoors 2|h7f5f0fbb055b|6
 Outdoors|habcd234c7599|8
 Objects|h2c9a3af3baf1|2
 Textures|haf3be498f848|2
-Holidays|hdfe622853c81|9
-Holidays 2|h4d1dee52344c|1
+Seasonal|he3e9ffab7399|9
+Seasonal 2|he277c04ab3c8|1
 Animations|h85bc8cb24d19|1
 Water-Rain|hcb3199d87a8e|3
 Flowers-Foliage|h730740d6398b|9
