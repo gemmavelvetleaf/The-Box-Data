@@ -12,8 +12,8 @@ Indoors 2
 Outdoors
 Objects
 Textures
-Holidays
-Holidays 2
+Seasonal
+Seasonal 2
 Animations
 Water-Rain
 Flowers-Foliage
