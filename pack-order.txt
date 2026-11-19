@@ -3,6 +3,7 @@ Abstract
 Patterns
 Patterns 2
 Patterns 3
+Patterns 4
 Psychedelic
 Brick-Stone
 Windows
