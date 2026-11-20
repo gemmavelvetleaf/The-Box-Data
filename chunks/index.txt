@@ -4,7 +4,7 @@ Abstract|h83f861f5b12b|9
 Patterns|h65ba840d698b|9
 Patterns 2|hc70913fc5356|9
 Patterns 3|h17266c360155|9
-Patterns 4|h47674f8201d1|6
+Patterns 4|h3a8eedd3c5e5|6
 Psychedelic|hab929de92b69|2
 Brick-Stone|hf0f6265582cc|6
 Windows|h0a73f7785a27|4
@@ -15,7 +15,7 @@ Outdoors|hfd34a5aa35a2|9
 Objects|h7429a1a6c87a|3
 Textures|haf3be498f848|2
 Seasonal|he3e9ffab7399|9
-Seasonal 2|hb4a394ddd9a9|1
+Seasonal 2|h121519f7cd80|4
 Animations|h85bc8cb24d19|1
 Water-Rain|hcb3199d87a8e|3
 Flowers-Foliage|h730740d6398b|9
