@@ -11,7 +11,7 @@ Windows|h0a73f7785a27|4
 Clouds-Skies|h52c9a8bb527b|7
 Indoors|ha377e6a7b8e8|10
 Indoors 2|h9b23d205602c|6
-Outdoors|hfd34a5aa35a2|9
+Outdoors|hee2e62c8727a|9
 Objects|h7429a1a6c87a|3
 Textures|haf3be498f848|2
 Seasonal|h100fef27ee0a|9
