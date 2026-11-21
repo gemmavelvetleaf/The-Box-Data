@@ -1,5 +1,5 @@
-CHUNK=1/6|f592aae2b51aef72aba1183ed89485d00be10c1a4dabc5c743af340fe2c62788
-VERSION=h3a8eedd3c5e5
+CHUNK=1/4|9f4cbed86147bba9843f1e3f95ed151a25fdc4eba65bfa66a8a58a2c75c80bb0
+VERSION=hce59476c1af7
 PACK=Patterns 4
 
 [Foam Ducks]
