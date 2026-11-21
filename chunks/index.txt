@@ -1,18 +1,18 @@
 # AUTO-GENERATED - DO NOT EDIT
 Defaults|hcc3fd4b7f797|1
-Abstract|h83f861f5b12b|9
-Patterns|h65ba840d698b|9
+Abstract|h8044c8e87a19|6
+Patterns|h4c3f418d9ef0|9
 Patterns 2|h77d1e55b5332|9
 Patterns 3|hf28762d56388|9
 Patterns 4|hce59476c1af7|4
 Psychedelic|h3b1938398348|3
-Brick-Stone|hf0f6265582cc|6
+Brick-Stone|hc579798cabe2|6
 Windows|h0a73f7785a27|4
-Clouds-Skies|h52c9a8bb527b|7
-Indoors|ha377e6a7b8e8|10
-Indoors 2|h9b23d205602c|6
+Clouds-Skies|hea883c71d8b0|7
+Indoors|h728ef7e9398c|10
+Indoors 2|h7fd4a349af72|6
 Outdoors|hee2e62c8727a|9
-Objects|h7429a1a6c87a|3
+Objects|he04c10d6413c|4
 Textures|haf3be498f848|2
 Seasonal|h100fef27ee0a|9
 Seasonal 2|he709e9e0b490|4
