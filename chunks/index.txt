@@ -6,7 +6,7 @@ Patterns 2|h77d1e55b5332|9
 Patterns 3|hf28762d56388|9
 Patterns 4|hce59476c1af7|4
 Psychedelic|h3b1938398348|3
-Brick-Stone|hc579798cabe2|6
+Brick-Stone|h8d4b6a80c979|6
 Windows|h0a73f7785a27|4
 Clouds-Skies|hea883c71d8b0|7
 Indoors|h728ef7e9398c|10
