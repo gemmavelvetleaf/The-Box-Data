@@ -3,7 +3,7 @@ Defaults|hcc3fd4b7f797|1
 Abstract|h8044c8e87a19|6
 Patterns|h4c3f418d9ef0|9
 Patterns 2|h77d1e55b5332|9
-Patterns 3|hf28762d56388|9
+Patterns 3|hd196aa16ef47|9
 Patterns 4|hce59476c1af7|4
 Psychedelic|h3b1938398348|3
 Brick-Stone|h8d4b6a80c979|6
