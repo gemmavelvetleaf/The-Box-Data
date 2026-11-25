@@ -1,8 +1,8 @@
-CHUNK=1/2|6328642970a98683dde9fd51bd7d18de44311654aaace40fa5103b2bbb11e57b
-VERSION=haf3be498f848
+CHUNK=1/2|a464abd46c989bd51ba12deda668ec51b0795fd7fa64409f65ca0aecffce3680
+VERSION=h10a51bf260b6
 PACK=Textures
 
-[pink-leather]
+[Pink-leather]
 F=95eb50d3-39df-03cc-9072-622c9d1d12e1|<1,1,0>|<0,0,0>|0|<1,1,1>|1|1
 C=95eb50d3-39df-03cc-9072-622c9d1d12e1|<1,1,0>|<0,0,0>|0|<1,1,1>|1|1
 W1=95eb50d3-39df-03cc-9072-622c9d1d12e1|<1,1,0>|<0,0,0>|0|<1,1,1>|1|1
