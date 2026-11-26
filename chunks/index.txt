@@ -4,7 +4,7 @@ Abstract|h5d997af2dc1b|6
 Patterns|h525826e22d8a|9
 Patterns 2|hbf89b8bea78d|9
 Patterns 3|hb4aa6f87db0c|9
-Patterns 4|h758e485d353c|4
+Patterns 4|hffdbd67339a9|5
 Psychedelic|hed9bdfa8d3c2|3
 Brick-Stone|hff461e4639a1|6
 Windows|haff17b350db9|4
