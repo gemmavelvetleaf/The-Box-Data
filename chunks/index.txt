@@ -8,7 +8,7 @@ Patterns 4|hffdbd67339a9|5
 Psychedelic|hea90dc3350c5|3
 Brick-Stone|hff461e4639a1|6
 Windows|haff17b350db9|4
-Clouds-Skies|ha678b87d0aed|7
+Clouds-Skies|h7d07f25fb671|7
 Indoors|h1ec8c2bbb870|10
 Indoors 2|h081136270dc1|6
 Outdoors|hf2bacb0a5642|9
