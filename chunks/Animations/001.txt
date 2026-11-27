@@ -1,4 +1,5 @@
-CHUNK=2/2|3593d121a163d895e8c89afaf8452087e2d76300d46548c0e7db4def06fffde4
+CHUNK=2/2|38307598761de24ac9f384b23b3279d3deba76a990ea37076063280cdc499ecd
+UW2=https://raw.githubusercontent.com/gemmavelvetleaf/The-Box-Data/main/GIF/mind.gif
 W2=1d0dd170-a000-08bd-e1bd-4486cb94f518|<1,1,0>|<0,0,0>|0|<1,1,1>|1|1
 O3=69476b4b-67c5-84b1-7713-d611a1a7b6d8|<1,1,0>|<0,0,0>|0|<1,1,1>|1|1
 UW3=https://raw.githubusercontent.com/gemmavelvetleaf/The-Box-Data/main/GIF/mind.gif
