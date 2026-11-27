@@ -1,5 +1,5 @@
-CHUNK=1/1|6011bf430ccd8e0278b21fa8f0040dc54f0e38019cfbed9971fad1d901483d3a
-VERSION=hbb452d7847dd
+CHUNK=1/1|261aa5a5ec9bdef3978684451ebdedcde22ecd799540849016766e48bebf7df6
+VERSION=h1be7d6164ac4
 PACK=Animations
 
 [TR Rustic Window]
@@ -19,10 +19,13 @@ W4=1d0dd170-a000-08bd-e1bd-4486cb94f518|<1.95732,1.100595,0>|<0,0.099979,0>|0|<1
 F=aa5cad20-2acb-373c-d63f-5489021570e0|<1,2.4,0>|<0,0,0>|0|<0.470588,0.470588,0.470588>|1|1
 C=82921dbe-cd25-23d9-1f8d-8dabef47fbc6|<1,1,0>|<0,0,0>|0|<1,1,1>|1|1
 O1=69476b4b-67c5-84b1-7713-d611a1a7b6d8|<1,1,0>|<0,0,0>|0|<1,1,1>|1|1
+UW1=https://raw.githubusercontent.com/gemmavelvetleaf/The-Box-Data/main/GIF/mind.gif
 W1=1d0dd170-a000-08bd-e1bd-4486cb94f518|<0.411435,0.231,0>|<0,0,0>|0|<1,1,1>|1|1
 O2=69476b4b-67c5-84b1-7713-d611a1a7b6d8|<1,1,0>|<0,0,0>|0|<1,1,1>|1|1
+UW2=https://raw.githubusercontent.com/gemmavelvetleaf/The-Box-Data/main/GIF/mind.gif
 W2=1d0dd170-a000-08bd-e1bd-4486cb94f518|<0.411315,0.231451,0>|<0,0,0>|0|<1,1,1>|1|1
 O3=69476b4b-67c5-84b1-7713-d611a1a7b6d8|<1,1,0>|<0,0,0>|0|<1,1,1>|1|1
+UW3=https://raw.githubusercontent.com/gemmavelvetleaf/The-Box-Data/main/GIF/mind.gif
 W3=1d0dd170-a000-08bd-e1bd-4486cb94f518|<0.41276,0.230962,0>|<0,0,0>|0|<1,1,1>|1|1
 O4=69476b4b-67c5-84b1-7713-d611a1a7b6d8|<1,1,0>|<0,0,0>|0|<1,1,1>|1|1
 UW4=https://raw.githubusercontent.com/gemmavelvetleaf/The-Box-Data/main/GIF/mind.gif
