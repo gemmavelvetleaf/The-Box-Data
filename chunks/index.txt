@@ -2,13 +2,13 @@
 Defaults|h802dab2cfca0|1
 Abstract|h02b7dfc669de|6
 Patterns|h525826e22d8a|9
-Patterns 2|hbf89b8bea78d|9
+Patterns 2|hb99fdf207031|9
 Patterns 3|hb4aa6f87db0c|9
-Patterns 4|hffdbd67339a9|5
+Patterns 4|h2ff6bf7293fd|4
 Psychedelic|ha24b56ad7dc0|3
 Brick-Stone|hff461e4639a1|6
 Windows|haff17b350db9|4
-Clouds-Skies|hbf1738aaad7a|7
+Clouds-Skies|h5c5533cde176|7
 Indoors|h2105cd8854b2|10
 Indoors 2|h081136270dc1|6
 Outdoors|hf2bacb0a5642|9
