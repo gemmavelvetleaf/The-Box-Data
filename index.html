@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="Explore The Box scene packs, browse previews and discover your next in-world setting.">
+  <title>The Box — Scene Catalogue</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #090e19; --panel: #121b2b; --line: #2a384e;
+      --text: #f4f3ef; --muted: #a2b2c3; --cyan: #78d9dc; --amber: #e9c58d;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; min-width: 290px; font-family: "Segoe UI", "Trebuchet MS", Arial, sans-serif; color: var(--text); background: var(--bg); }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    a { color: var(--cyan); }
+    button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 3px solid var(--cyan); outline-offset: 3px; }
+    .shell { width: min(1440px, calc(100% - 52px)); margin-inline: auto; }
+    .topbar { border-bottom: 1px solid #ffffff1a; background: #0b1320f0; }
+    .topbar-inner { display: flex; align-items: center; justify-content: space-between; min-height: 76px; gap: 20px; }
+    .brand { display: flex; align-items: center; gap: 14px; color: inherit; text-decoration: none; }
+    .brand-mark { width: 42px; height: 42px; border: 1px solid #80d4d3a0; border-radius: 12px; display: grid; place-items: center; color: var(--cyan); font-family: Georgia, serif; font-size: 25px; background: linear-gradient(150deg,#233c4d,#0b1422); box-shadow: inset 0 0 22px #83dfe31a; }
+    .brand-main { display: block; font-size: 17px; font-weight: 800; letter-spacing: .16em; }
+    .brand-sub { color: var(--muted); display: block; font-size: 12px; letter-spacing: .12em; margin-top: 3px; }
+    .top-note { color: var(--muted); font-size: 13px; letter-spacing: .09em; text-transform: uppercase; }
+    .hero { position: relative; overflow: hidden; border-bottom: 1px solid #ffffff18; background: radial-gradient(ellipse at 16% 0%,#183a4d 0,transparent 49%),linear-gradient(110deg,#121e30,#0a1020); }
+    .hero-inner { display: grid; grid-template-columns: minmax(0,1fr) minmax(340px,.84fr); gap: 44px; align-items: center; padding-block: 62px 68px; min-height: 410px; }
+    .eyebrow { color: var(--cyan); font-size: 13px; font-weight: 800; letter-spacing: .25em; text-transform: uppercase; }
+    h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(42px,5vw,70px); line-height: 1.03; letter-spacing: -.035em; margin: 17px 0 20px; max-width: 720px; }
+    h1 em { font-weight: 400; font-style: italic; color: var(--amber); }
+    .intro { font-size: 17px; line-height: 1.75; color: #bfceda; max-width: 630px; margin: 0; }
+    .hero-visual { position: relative; padding: 13px 18px 26px 0; }
+    .hero-visual::before { content: ""; position: absolute; inset: -20px 0 10px 28px; border-radius: 50%; background: #69dce72c; filter: blur(57px); }
+    .hero-image { display: block; position: relative; width: 100%; aspect-ratio: 1.45; object-fit: cover; border: 1px solid #ffffff36; border-radius: 13px; box-shadow: 18px 20px 0 #dfb86c13,0 24px 75px #0009; }
+    .image-caption { position: absolute; bottom: 1px; left: 18px; background: #07111cf0; border: 1px solid #ffffff30; border-radius: 5px; font-size: 12px; font-weight: 700; letter-spacing: .1em; color: #e8edee; text-transform: uppercase; padding: 8px 13px; }
+    .library { padding-block: 40px 80px; }
+    .section-head { display: flex; justify-content: space-between; gap: 16px; align-items: end; margin-bottom: 25px; }
+    .section-label { font-size: 12px; color: var(--cyan); font-weight: 700; text-transform: uppercase; letter-spacing: .19em; }
+    .section-head h2 { margin: 9px 0 0; font-family: Georgia,serif; font-weight: 400; font-size: clamp(30px,3vw,42px); }
+    .refresh { padding: 11px 17px; border: 1px solid #526475; background: #1c2b3c; color: #e9f2f3; border-radius: 7px; font-weight: 600; transition: background .2s; }
+    .refresh:hover { background: #283c51; }
+    .refresh:disabled { opacity: .55; cursor: wait; }
+    .library-layout { display: grid; grid-template-columns: 230px minmax(0,1fr); gap: 28px; align-items: start; }
+    .sidebar { position: sticky; top: 20px; border: 1px solid var(--line); background: #111a29; padding: 17px 11px 14px; border-radius: 11px; max-height: min(78vh, 980px); overflow: auto; }
+    .sidebar-head { display: flex; align-items: center; justify-content: space-between; padding: 2px 10px 14px; color: var(--muted); text-transform: uppercase; font-size: 12px; font-weight: 700; letter-spacing: .13em; }
+    .pack-list { display: grid; gap: 3px; }
+    .pack-button { background: transparent; color: #bac8d6; border: 1px solid transparent; border-radius: 6px; width: 100%; display: flex; justify-content: space-between; text-align: left; align-items: center; gap: 8px; padding: 10px 11px; line-height: 1.3; font-size: 14px; }
+    .pack-button:hover { background: #ffffff0a; color: white; }
+    .pack-button.active { background: #203748; color: #e4ffff; border-color: #4b8391; font-weight: 700; }
+    .pack-count { color: #91a6b7; background: #0003; padding: 3px 6px; border-radius: 3px; font-size: 12px; font-variant-numeric: tabular-nums; }
+    .pack-button.active .pack-count { color: #9be4e3; }
+    .mobile-packs { display: none; }
+    .gallery-panel { min-width: 0; }
+    .gallery-toolbar { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; margin-bottom: 18px; }
+    .gallery-title { margin: 0; font-family: Georgia,serif; font-weight: 400; font-size: 31px; }
+    .gallery-summary { color: var(--muted); font-size: 14px; margin: 7px 0 0; }
+    .search-wrap { min-width: min(100%,260px); }
+    .search-wrap label { display: block; margin-bottom: 7px; font-size: 12px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; font-weight: 700; }
+    .search-wrap input { width: 100%; height: 42px; border-radius: 6px; border: 1px solid #516173; background: #182638; color: #f5f8fb; padding-inline: 13px; font-size: 15px; }
+    .search-wrap input::placeholder { color: #a2adbb; }
+    .status { padding: 12px 15px; border: 1px solid #314b60; background: #15293b; color: #bce5eb; border-radius: 7px; margin-bottom: 18px; line-height: 1.5; font-size: 14px; }
+    .status[hidden] { display: none; }
+    .status.error { border-color: #87585c; background: #3b2329; color: #ffcfce; }
+    .gallery-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 18px; }
+    .scene-card { overflow: hidden; padding: 0; border: 1px solid #35465a; background: #152033; border-radius: 9px; color: white; text-align: left; display: flex; flex-direction: column; min-width: 0; transition: border-color .15s, transform .15s, box-shadow .15s; }
+    .scene-card:hover { border-color: var(--cyan); box-shadow: 0 7px 26px #0006; transform: translateY(-2px); }
+    .thumb { display: block; width: 100%; aspect-ratio: 1.23; background: linear-gradient(130deg,#243a4c,#111b2b); position: relative; overflow: hidden; }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .thumb .missing { display: none; position: absolute; inset: 0; align-items: center; justify-content: center; text-align: center; padding: 20px; color: #b4c9d8; font-size: 14px; }
+    .thumb.failed img { display: none; }
+    .thumb.failed .missing { display: flex; }
+    .scene-meta { padding: 12px 14px 14px; min-height: 69px; }
+    .scene-name { display: block; font-size: 15px; font-weight: 700; overflow-wrap: anywhere; line-height: 1.35; }
+    .scene-pack { display: block; margin-top: 6px; font-size: 12px; color: #93afbf; }
+    .empty { border: 1px dashed #526273; border-radius: 8px; background: #172234; padding: 35px 25px; color: var(--muted); line-height: 1.6; }
+    .more-wrap { padding-top: 25px; text-align: center; }
+    .more-button { border: 1px solid #6abac1; color: #bbf3f3; border-radius: 7px; background: #143443; padding: 12px 24px; font-weight: 700; }
+    .more-button:hover { background: #1f4c5d; }
+    .foot { border-top: 1px solid #ffffff1a; padding-block: 26px 32px; color: #91a5b6; font-size: 13px; }
+    .foot-inner { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    .foot a { color: #a5dcdf; }
+    .lightbox { display: none; position: fixed; inset: 0; z-index: 100; background: #03060df0; padding: 25px; }
+    .lightbox.open { display: flex; flex-direction: column; }
+    .lightbox-top { width: min(1250px,100%); margin: 0 auto 12px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .lightbox-title { font-family: Georgia,serif; font-size: clamp(21px,3vw,29px); margin: 0; }
+    .lightbox-sub { color: #aec1d0; font-size: 13px; margin-top: 6px; }
+    .lightbox-close, .lightbox-nav { border: 1px solid #65788b; background: #203246; color: #f7ffff; border-radius: 7px; padding: 10px 15px; font-size: 15px; font-weight: 700; }
+    .lightbox-close:hover, .lightbox-nav:hover { background: #305168; }
+    .lightbox-figure { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 14px; width: min(1250px,100%); flex: 1; min-height: 0; margin: 0 auto; }
+    .lightbox-figure img { display: block; max-width: 100%; max-height: calc(100vh - 145px); min-height: 0; margin-inline: auto; object-fit: contain; border-radius: 5px; box-shadow: 0 14px 35px #0008; }
+    .lightbox-nav { align-self: center; }
+    .lightbox-hint { text-align: center; color: #92aabd; font-size: 12px; margin-top: 13px; }
+    @media (max-width:1080px) { .hero-inner { grid-template-columns: 1fr 0.8fr; gap: 25px; } .gallery-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } .library-layout { grid-template-columns: 205px 1fr; gap: 18px; } }
+    @media (max-width:740px) { .shell { width: min(100% - 28px, 640px); } .hero-inner { display: flex; flex-direction: column; align-items: stretch; padding-block: 46px 54px; gap: 28px; } .hero-visual { width: min(520px,100%); margin: auto; } .intro { font-size: 16px; } .top-note { display: none; } .library { padding-top: 30px; } .library-layout { display: block; } .sidebar { display: none; } .mobile-packs { display: block; margin-bottom: 22px; } .mobile-packs label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 8px; } .mobile-packs select { width: 100%; padding: 12px 14px; background: #17283a; border: 1px solid #63778a; border-radius: 7px; color: white; font-size: 16px; } .section-head { align-items: center; } .section-head h2 { font-size: 29px; } .gallery-toolbar { align-items: stretch; } .search-wrap { width: 100%; } .gallery-grid { gap: 12px; } .lightbox { padding: 14px; } .lightbox-figure { grid-template-columns: 1fr 1fr; grid-template-rows: minmax(0,1fr) auto; } .lightbox-figure img { grid-column: 1 / 3; grid-row: 1; max-height: calc(100vh - 220px); } .lightbox-nav { grid-row: 2; } .lightbox-hint { display: none; } }
+    @media (max-width:460px) { .gallery-grid { grid-template-columns: 1fr; } .topbar-inner { min-height: 64px; } .brand-mark { width: 36px; height: 36px; } .brand-main { font-size: 15px; } .refresh { padding-inline: 11px; } }
+    @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } .scene-card, .refresh { transition:none; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="#top" aria-label="The Box scene catalogue home"><span class="brand-mark" aria-hidden="true">◇</span><span><span class="brand-main">THE BOX</span><span class="brand-sub">SCENE CATALOGUE</span></span></a>
+      <span class="top-note">Designed for discovery</span>
+    </div>
+  </header>
+  <main id="top">
+    <section class="hero">
+      <div class="shell hero-inner">
+        <div>
+          <div class="eyebrow">A new view in every direction</div>
+          <h1>Step inside <em>something different.</em></h1>
+          <p class="intro">Explore the scene library for <strong>The Box</strong>. Choose a collection, browse the rooms and environments, and open any picture for a closer look. The images follow the same scene packs used in-world.</p>
+        </div>
+        <div class="hero-visual">
+          <img class="hero-image" id="hero-image" alt="A cosmic, Escher-inspired room with impossible stairways" decoding="async">
+          <span class="image-caption">Inspired Escher</span>
+        </div>
+      </div>
+    </section>
+    <section class="library shell" id="browse" aria-labelledby="browse-title">
+      <div class="section-head">
+        <div><div class="section-label">The collections</div><h2 id="browse-title">Find your next scene.</h2></div>
+        <button class="refresh" id="refresh" type="button" title="Check GitHub for the latest scene-pack changes">Refresh lists</button>
+      </div>
+      <div class="library-layout">
+        <aside class="sidebar" aria-label="Scene packs"><div class="sidebar-head"><span>Scene packs</span><span id="pack-total">—</span></div><nav class="pack-list" id="pack-list" aria-label="Choose a scene pack"></nav></aside>
+        <div class="gallery-panel">
+          <div class="mobile-packs"><label for="pack-select">Choose a scene pack</label><select id="pack-select" aria-label="Choose a scene pack"></select></div>
+          <div class="gallery-toolbar">
+            <div><h3 class="gallery-title" id="gallery-title">The collection</h3><p class="gallery-summary" id="gallery-summary">Checking available scenes…</p></div>
+            <div class="search-wrap"><label for="search">Find a scene</label><input id="search" type="search" placeholder="Search by scene name" autocomplete="off"></div>
+          </div>
+          <div class="status" id="status" role="status">Checking the scene library…</div>
+          <div class="gallery-grid" id="gallery-grid" aria-live="polite"></div>
+          <div class="more-wrap" id="more-wrap" hidden><button type="button" id="more-button" class="more-button">Show more scenes</button></div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="foot"><div class="shell foot-inner"><span>The Box • A world of scenes, one room at a time.</span><span>Scene selections follow <a href="https://github.com/gemmavelvetleaf/The-Box-Data" target="_blank" rel="noopener noreferrer">the live scene library</a>.</span></div></footer>
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-title" aria-hidden="true">
+    <div class="lightbox-top"><div><h2 class="lightbox-title" id="lightbox-title"></h2><div class="lightbox-sub" id="lightbox-pack"></div></div><button class="lightbox-close" id="lightbox-close" type="button">Close ×</button></div>
+    <div class="lightbox-figure"><button class="lightbox-nav" id="lightbox-prev" type="button" aria-label="Previous scene">Previous</button><img id="lightbox-image" alt="Expanded scene preview"><button class="lightbox-nav" id="lightbox-next" type="button" aria-label="Next scene">Next</button></div>
+    <div class="lightbox-hint">Use the left and right arrow keys to browse · Esc to close</div>
+  </div>
+  <script>
+    (() => {
+      'use strict';
+      // On GitHub Pages, read directly from this repository. Elsewhere (including
+      // the private preview), read the same public files from GitHub's raw host.
+      const onPages = location.hostname === 'gemmavelvetleaf.github.io' && location.pathname.startsWith('/The-Box-Data');
+      const base = onPages ? `${location.origin}/The-Box-Data/` : 'https://raw.githubusercontent.com/gemmavelvetleaf/The-Box-Data/main/';
+      const address = path => base + path.split('/').map(encodeURIComponent).join('/');
+      const imageAddress = scene => address(`Img/${scene}.jpg`);
+      const $ = id => document.getElementById(id);
+      const ui = { status:$('status'), grid:$('gallery-grid'), list:$('pack-list'), select:$('pack-select'), title:$('gallery-title'), summary:$('gallery-summary'), search:$('search'), more:$('more-wrap'), moreButton:$('more-button'), refresh:$('refresh'), modal:$('lightbox'), modalTitle:$('lightbox-title'), modalPack:$('lightbox-pack'), modalImage:$('lightbox-image') };
+      const all = '__all__';
+      const pageSize = 60;
+      let packs = [], selected = 'Patterns', visible = [], displayed = 0, lightboxIndex = -1, lastFocus = null, refreshSerial = 0;
+
+      $('hero-image').src = imageAddress('Inspired Escher');
+      function status(message, error=false) {
+        ui.status.textContent = message;
+        ui.status.className = `status${error ? ' error' : ''}`;
+        ui.status.hidden = !message;
+      }
+      function namesFromPack(body) {
+        const found = [];
+        for (const line of body.split(/\r?\n/)) {
+          const match = line.trim().match(/^\[(.+)\]$/);
+          if (match) found.push(match[1]);
+        }
+        return found;
+      }
+      async function readText(path) {
+        const response = await fetch(address(path) + `?refresh=${Date.now()}`, {cache:'no-store'});
+        if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
+        return response.text();
+      }
+      function create(tag, cls, text) {
+        const el = document.createElement(tag);
+        if (cls) el.className = cls;
+        if (text !== undefined) el.textContent = text;
+        return el;
+      }
+      function currentItems() {
+        const source = selected === all ? packs.flatMap(p => p.names.map(name => ({name,pack:p.name}))) : (packs.find(p => p.name === selected)?.names || []).map(name => ({name,pack:selected}));
+        const term = ui.search.value.trim().toLocaleLowerCase();
+        return term ? source.filter(item => item.name.toLocaleLowerCase().includes(term)) : source;
+      }
+      function renderNavigation() {
+        ui.list.replaceChildren();
+        ui.select.replaceChildren();
+        const choices = [{name:all,names:packs.flatMap(p => p.names)}, ...packs];
+        for (const pack of choices) {
+          const label = pack.name === all ? 'All scenes' : pack.name;
+          const count = pack.names.length;
+          const btn = create('button',`pack-button${selected === pack.name ? ' active' : ''}`);
+          btn.type = 'button'; btn.setAttribute('aria-current', selected === pack.name ? 'true' : 'false');
+          btn.append(create('span','',label),create('span','pack-count',String(count)));
+          btn.addEventListener('click',()=>choosePack(pack.name));
+          ui.list.append(btn);
+          const option = create('option','',`${label} (${count})`);
+          option.value = pack.name;
+          ui.select.append(option);
+        }
+        ui.select.value = selected;
+        $('pack-total').textContent = String(packs.length);
+      }
+      function choosePack(name, updateUrl=true) {
+        if (name !== all && !packs.some(p => p.name === name)) return;
+        selected = name;
+        ui.search.value = '';
+        if (updateUrl) {
+          const url = new URL(location.href);
+          url.searchParams.set('pack', name === all ? 'All' : name);
+          url.searchParams.delete('scene');
+          history.replaceState(null,'',url);
+        }
+        renderNavigation();
+        renderGallery();
+        if (matchMedia('(max-width:740px)').matches) $('browse').scrollIntoView({behavior:'smooth',block:'start'});
+      }
+      function card(item, index) {
+        const btn = create('button','scene-card');
+        btn.type='button'; btn.title=`Enlarge ${item.name}`;
+        const thumb = create('span','thumb');
+        const img = document.createElement('img');
+        img.src=imageAddress(item.name); img.alt=`Preview of ${item.name}`; img.loading='lazy'; img.decoding='async';
+        img.addEventListener('error',()=>thumb.classList.add('failed'));
+        thumb.append(img,create('span','missing','Preview not available'));
+        const meta = create('span','scene-meta');
+        meta.append(create('span','scene-name',item.name),create('span','scene-pack',item.pack));
+        btn.append(thumb,meta);
+        btn.addEventListener('click',()=>openLightbox(index,btn));
+        return btn;
+      }
+      function appendNext() {
+        const end = Math.min(visible.length,displayed + pageSize);
+        const fragment = document.createDocumentFragment();
+        for (let i=displayed;i<end;i++) fragment.append(card(visible[i],i));
+        ui.grid.append(fragment);
+        displayed=end;
+        ui.more.hidden = displayed >= visible.length;
+        ui.moreButton.textContent = `Show more scenes (${visible.length - displayed} remaining)`;
+      }
+      function renderGallery() {
+        const packLabel= selected === all ? 'All scenes' : selected;
+        ui.title.textContent=packLabel;
+        visible=currentItems(); displayed=0;
+        ui.grid.replaceChildren();
+        ui.summary.textContent=`${visible.length} ${visible.length === 1 ? 'scene' : 'scenes'}${ui.search.value ? ' matching your search' : ''} · Select an image to enlarge`;
+        if (visible.length) appendNext();
+        else {
+          const empty=create('div','empty',ui.search.value ? 'No scenes match that search. Try another name.' : 'No scenes are listed in this pack yet.');
+          empty.style.gridColumn='1 / -1'; ui.grid.append(empty); ui.more.hidden=true;
+        }
+      }
+      function openLightbox(index,trigger) {
+        if (!visible[index]) return;
+        lastFocus=trigger; lightboxIndex=index;
+        updateLightbox();
+        ui.modal.classList.add('open'); ui.modal.setAttribute('aria-hidden','false');
+        document.body.style.overflow='hidden'; $('lightbox-close').focus();
+      }
+      function updateLightbox() {
+        const item=visible[lightboxIndex]; if (!item) return;
+        ui.modalTitle.textContent=item.name; ui.modalPack.textContent=`${item.pack} · ${lightboxIndex + 1} of ${visible.length}`;
+        ui.modalImage.src=imageAddress(item.name); ui.modalImage.alt=`Enlarged preview: ${item.name}`;
+        $('lightbox-prev').disabled=lightboxIndex===0;
+        $('lightbox-next').disabled=lightboxIndex===visible.length-1;
+      }
+      function navigateLightbox(direction) {
+        lightboxIndex=Math.max(0,Math.min(visible.length-1,lightboxIndex+direction));
+        updateLightbox();
+      }
+      function closeLightbox() {
+        ui.modal.classList.remove('open'); ui.modal.setAttribute('aria-hidden','true'); ui.modalImage.removeAttribute('src');
+        document.body.style.overflow=''; if (lastFocus?.isConnected) lastFocus.focus();
+      }
+      async function refresh() {
+        const run=++refreshSerial;
+        ui.refresh.disabled=true;
+        status('Checking the current scene-pack listings…');
+        try {
+          const order=(await readText('pack-order.txt')).split(/\r?\n/).map(s=>s.trim()).filter(s=>s && !s.startsWith('#') && !s.startsWith('//'));
+          if (!order.length) throw new Error('The pack-order file is empty.');
+          const results=await Promise.allSettled(order.map(async name=>({name,names:namesFromPack(await readText(`packs/${name}.txt`))})));
+          if (run!==refreshSerial) return;
+          packs=results.filter(r=>r.status==='fulfilled').map(r=>r.value);
+          const failures=results.filter(r=>r.status==='rejected');
+          if (!packs.length) throw new Error('No scene pack files could be loaded.');
+          const requested=new URL(location.href).searchParams.get('pack');
+          if (requested && (requested==='All'||packs.some(p=>p.name===requested))) selected=requested==='All'?all:requested;
+          else if (!packs.some(p=>p.name===selected)) selected=packs.find(p=>p.name==='Patterns')?.name || packs[0].name;
+          renderNavigation(); renderGallery();
+          if (failures.length) status(`${packs.length} packs loaded. ${failures.length} pack file${failures.length>1?'s':''} could not be read; try Refresh lists again.`,true);
+          else status('');
+        } catch (err) {
+          if (run!==refreshSerial) return;
+          status('The scene lists could not be loaded right now. Check your connection and use Refresh lists to try again. '+err.message,true);
+        } finally { if (run===refreshSerial) ui.refresh.disabled=false; }
+      }
+      ui.search.addEventListener('input', renderGallery);
+      ui.select.addEventListener('change',()=>choosePack(ui.select.value));
+      ui.refresh.addEventListener('click',refresh);
+      ui.moreButton.addEventListener('click',appendNext);
+      $('lightbox-close').addEventListener('click',closeLightbox);
+      $('lightbox-prev').addEventListener('click',()=>navigateLightbox(-1));
+      $('lightbox-next').addEventListener('click',()=>navigateLightbox(1));
+      ui.modal.addEventListener('click',e=>{if(e.target===ui.modal)closeLightbox();});
+      document.addEventListener('keydown',e=>{
+        if (!ui.modal.classList.contains('open')) return;
+        if (e.key==='Escape') closeLightbox();
+        if (e.key==='ArrowLeft') navigateLightbox(-1);
+        if (e.key==='ArrowRight') navigateLightbox(1);
+        if (e.key==='Tab') {
+          const controls=[$('lightbox-close'),$('lightbox-prev'),$('lightbox-next')].filter(el=>!el.disabled);
+          if (e.shiftKey && document.activeElement===controls[0]) {e.preventDefault();controls.at(-1).focus();}
+          else if (!e.shiftKey && document.activeElement===controls.at(-1)) {e.preventDefault();controls[0].focus();}
+        }
+      });
+      refresh();
+    })();
+  </script>
+</body>
+</html>
