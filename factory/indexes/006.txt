@@ -1,0 +1,20 @@
+BOXPACK=1|006|Psychedelic
+SCENE|000|Psych-odelic
+SCENE|001|Flower Power
+SCENE|002|Flowers-680
+SCENE|003|Floral-788
+SCENE|004|Flora-723
+SCENE|005|Faaar Out Man
+SCENE|006|Bad Acid Trip
+SCENE|007|Math Madness
+SCENE|008|Numbers
+SCENE|009|Fine Lines-8565
+SCENE|010|Tie Dye
+SCENE|011|Pattern-879
+SCENE|012|Inspired Escher
+SCENE|013|Impossible Room
+SCENE|014|Eyeeees-2967
+SCENE|015|Heart-99
+SCENE|016|Abstract-828
+SCENE|017|Abs-8809
+SCENE|018|Mountains-977

@@ -1,3 +1,24 @@
 BOXFACTORY=1
+PACK|000|4|Defaults
+PACK|001|36|Abstract
+PACK|002|54|Patterns
+PACK|003|53|Patterns 2
+PACK|004|54|Patterns 3
+PACK|005|25|Patterns 4
+PACK|006|19|Psychedelic
+PACK|007|31|Brick-Stone
 PACK|008|20|Windows
+PACK|009|39|Clouds-Skies
+PACK|010|54|Indoors
+PACK|011|34|Indoors 2
+PACK|012|52|Outdoors
+PACK|013|23|Objects
+PACK|014|9|Textures
+PACK|015|53|Seasonal
+PACK|016|24|Seasonal 2
 PACK|017|3|Animations
+PACK|018|16|Water-Rain
+PACK|019|54|Flowers-Foliage
+PACK|020|21|Flowers-Foliage 2
+PACK|021|29|Foods
+PACK|022|16|Frames

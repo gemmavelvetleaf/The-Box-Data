@@ -1,0 +1,10 @@
+BOXPACK=1|014|Textures
+SCENE|000|Pink-leather
+SCENE|001|Denim-186
+SCENE|002|Floor-1853
+SCENE|003|Wood-146
+SCENE|004|Snow-570
+SCENE|005|Meadow-196
+SCENE|006|Cracked Earth-139
+SCENE|007|Pastel Fabrics
+SCENE|008|Paper wrinkled

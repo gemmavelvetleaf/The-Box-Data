@@ -1,0 +1,32 @@
+BOXPACK=1|007|Brick-Stone
+SCENE|000|Long Bricks
+SCENE|001|Aged Brick-184
+SCENE|002|Block Wall-18
+SCENE|003|Brick Patio at Night
+SCENE|004|Red Brick Wall
+SCENE|005|Brick-110
+SCENE|006|Brick-wall-191
+SCENE|007|Bricks-184
+SCENE|008|Red-brick-354
+SCENE|009|Stone Wall Packed
+SCENE|010|Green Blue Brick
+SCENE|011|Graystone Room
+SCENE|012|Stone Wall Tiles
+SCENE|013|Outdoor White Brick
+SCENE|014|TR Outdoor White Brick
+SCENE|015|Drachenfels_cellar
+SCENE|016|Monkstown_castle
+SCENE|017|Smelting tower interior
+SCENE|018|Stone backyard fence
+SCENE|019|Gray Coarse Brick
+SCENE|020|Stone Walls
+SCENE|021|Glass Blocks
+SCENE|022|Glass Blocks 2
+SCENE|023|Gray Brick
+SCENE|024|Lit Brick
+SCENE|025|Old Red Brick
+SCENE|026|White Bricks
+SCENE|027|Dark Brick Tile
+SCENE|028|Stones
+SCENE|029|Wall-830
+SCENE|030|Window-720

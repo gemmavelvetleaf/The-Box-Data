@@ -1,0 +1,55 @@
+BOXPACK=1|010|Indoors
+SCENE|000|Marble Room
+SCENE|001|Bar Walls
+SCENE|002|Photo Studio
+SCENE|003|Auric's Lab
+SCENE|004|Jungle Room
+SCENE|005|Arched Walls
+SCENE|006|Blue Panel Walls
+SCENE|007|BW Paneled
+SCENE|008|Grass Mat
+SCENE|009|Gray wood w-carpet
+SCENE|010|Ribbed Headboard
+SCENE|011|White Palace
+SCENE|012|White Curtains
+SCENE|013|Black Curtains
+SCENE|014|Red Curtains
+SCENE|015|Dark Red Curtain
+SCENE|016|Tri-curtain-367
+SCENE|017|Gray Stucco
+SCENE|018|Dark Gray w-Trim
+SCENE|019|Dark Brown Gray w-trim
+SCENE|020|Lime Green Striped
+SCENE|021|Stucco Ceiling Tile
+SCENE|022|Dark Brown Stucco
+SCENE|023|Dark Blue Green
+SCENE|024|Palace Lobby
+SCENE|025|Padded Room
+SCENE|026|Green Stripe Wood Floor
+SCENE|027|Brown-Gray w-Rail
+SCENE|028|Plum Texture Background
+SCENE|029|Dark Wood Paneling
+SCENE|030|Wood Paneling w-Carpet
+SCENE|031|Gray Pattern Lit
+SCENE|032|Gray Rectangle Pattern
+SCENE|033|Gray-Brn-Red Textured
+SCENE|034|Med Gray w-Lights
+SCENE|035|Off White Dark w-trim
+SCENE|036|Smooth Paneled Wall
+SCENE|037|Med White gray trim
+SCENE|038|Black Walkway
+SCENE|039|Black Wall w-light
+SCENE|040|Blackboard Pixels
+SCENE|041|Dark Blue Stucco
+SCENE|042|Torn Wallpaper
+SCENE|043|Antique Wallpaper
+SCENE|044|Blue Gradient
+SCENE|045|Blue Green Brown
+SCENE|046|Brown Orange w-trim
+SCENE|047|GreenWoodWall-184
+SCENE|048|Light Orange-184
+SCENE|049|Old Walls-186
+SCENE|050|Old Walls-189
+SCENE|051|Tire Depot
+SCENE|052|Piano-keys-10
+SCENE|053|Old Walls-863

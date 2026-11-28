@@ -1,0 +1,30 @@
+BOXPACK=1|021|Foods
+SCENE|000|Apples-186
+SCENE|001|Apples-756
+SCENE|002|Bananas-111
+SCENE|003|Cherries-52
+SCENE|004|Green-cabbage
+SCENE|005|Coffee Bean-974
+SCENE|006|Oranges-81
+SCENE|007|Raspberries-149
+SCENE|008|Strawberry-195
+SCENE|009|Pasta Heart-979
+SCENE|010|Pasta-7967
+SCENE|011|Pasta-88
+SCENE|012|Hazelnuts-271
+SCENE|013|Hazelnuts-652
+SCENE|014|Cherries-184
+SCENE|015|Cherries-371
+SCENE|016|Peanuts-61
+SCENE|017|Plums-321
+SCENE|018|Popcorn-488
+SCENE|019|Coffee-420
+SCENE|020|Cucumbers-84
+SCENE|021|Oranges-501
+SCENE|022|Watermelon-828
+SCENE|023|Hazelnuts-73
+SCENE|024|Walnuts-101
+SCENE|025|Peppers-46
+SCENE|026|Pimentos
+SCENE|027|Oranges-7273
+SCENE|028|White Pumpkin-67

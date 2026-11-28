@@ -1,0 +1,5 @@
+BOXPACK=1|000|Defaults
+SCENE|000|Transparent
+SCENE|001|Green Screen w-Markers
+SCENE|002|Black
+SCENE|003|White

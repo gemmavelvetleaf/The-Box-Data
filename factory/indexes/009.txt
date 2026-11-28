@@ -1,0 +1,40 @@
+BOXPACK=1|009|Clouds-Skies
+SCENE|000|Sky Citrus Road
+SCENE|001|Clouds-Lightning
+SCENE|002|Large Storm Clouds
+SCENE|003|Milky-way-675
+SCENE|004|Milky-way-740
+SCENE|005|Orange Mountains
+SCENE|006|Orange Sunshine
+SCENE|007|Pastel Sky
+SCENE|008|Pink Clouds
+SCENE|009|Pink-clouds-87
+SCENE|010|Puffy Clouds
+SCENE|011|Sky-7218
+SCENE|012|Blue Starry
+SCENE|013|Sky-345
+SCENE|014|Clouds-147
+SCENE|015|Clouds-842
+SCENE|016|Clouds-951
+SCENE|017|Clouds-834
+SCENE|018|Clouds-940
+SCENE|019|Clouds-272
+SCENE|020|Clouds-3830
+SCENE|021|Clouds-500
+SCENE|022|Milky-way-27
+SCENE|023|Starry-sky-26
+SCENE|024|Sunset-206
+SCENE|025|North-star-2
+SCENE|026|Pastel Sunset
+SCENE|027|Evening Road
+SCENE|028|Farm Field
+SCENE|029|Firey Sunset
+SCENE|030|Big Fluffy Blue Clouds
+SCENE|031|Misty_puresky
+SCENE|032|Partly
+SCENE|033|Partly 2
+SCENE|034|Mud_road_puresky
+SCENE|035|Overcast_puresky
+SCENE|036|Sky-833
+SCENE|037|Sky-713
+SCENE|038|Sunset-368

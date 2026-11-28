@@ -1,0 +1,7 @@
+[Green leaves-66]
+F=8fab1a92-00fb-e0cb-dd21-db1edfa5fdfd|<1,1,0>|<0,0,0>|0|<1,1,1>|1|0
+C=8fab1a92-00fb-e0cb-dd21-db1edfa5fdfd|<1,1,0>|<0,0,0>|0|<1,1,1>|1|0
+W1=8fab1a92-00fb-e0cb-dd21-db1edfa5fdfd|<1,1,0>|<0,0,0>|0|<1,1,1>|1|0
+W2=8fab1a92-00fb-e0cb-dd21-db1edfa5fdfd|<1,1,0>|<0,0,0>|0|<1,1,1>|1|0
+W3=8fab1a92-00fb-e0cb-dd21-db1edfa5fdfd|<1,1,0>|<0,0,0>|0|<1,1,1>|1|0
+W4=8fab1a92-00fb-e0cb-dd21-db1edfa5fdfd|<1,1,0>|<0,0,0>|0|<1,1,1>|1|0
