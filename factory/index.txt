@@ -1,0 +1,3 @@
+BOXFACTORY=1
+PACK|008|20|Windows
+PACK|017|3|Animations

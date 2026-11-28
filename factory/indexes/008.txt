@@ -1,0 +1,21 @@
+BOXPACK=1|008|Windows
+SCENE|000|TR Rustic Window
+SCENE|001|Gray Ocean Window
+SCENE|002|City Skybox
+SCENE|003|City SkyBox 2
+SCENE|004|City Skybox 3
+SCENE|005|City Skybox 4
+SCENE|006|Gray Window Hallway
+SCENE|007|Gray w-Corner Window
+SCENE|008|Off White half windows
+SCENE|009|TR Gray Side Window
+SCENE|010|TR Gray w-Corner Window
+SCENE|011|White Room Wide Window
+SCENE|012|TR White Room Wide Window
+SCENE|013|Dark Tan w-window
+SCENE|014|Wide Windows
+SCENE|015|Wide Windows 2
+SCENE|016|Wide Window Flowered
+SCENE|017|Dark Gray w-Window
+SCENE|018|Dark Gray Corner Window
+SCENE|019|Brick Window-484
